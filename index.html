@@ -1,26 +1,65 @@
-<!DOCTYPE html>
+  
 <html>
-<head>
-<meta charset=utf-8 />
-<title>A simple map</title>
-<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-<script src='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
-<link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
-<style>
-  body { margin:0; padding:0; }
-  #map { position:absolute; top:0; bottom:0; width:100%; }
-</style>
-</head>
+<title></title>
+<script src='//api.tiles.mapbox.com/mapbox.js/plugins/turf/v1.4.0/turf.min.js'></script>
+  <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.js'></script>
+  <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.css' rel='stylesheet' />
+  <style>
+    body { margin:0; padding:0; }
+    .map { position:absolute; top:50px; bottom:50px; width:100%; }
+  </style>
+
 <body>
-
-
-<div id='map'></div>
+   <p id="demo"></p>
+<div id='map-four' class='map'> </div>
 <script>
-L.mapbox.accessToken = pk.eyJ1IjoibWFwcGluZ3RoaW5ncyIsImEiOiJkSy1MRlNVIn0.jt2ol5HlgFaCdx4Ajn5WjA;
-var map = L.mapbox.map('map', 'mapbox.streets')
-    .setView([40, -74.50], 9);
-</script>
+L.mapbox.accessToken = 'pk.eyJ1IjoibWFwcGluZ3RoaW5ncyIsImEiOiJkSy1MRlNVIn0.jt2ol5HlgFaCdx4Ajn5WjA';
+var geojson = [
+  {
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -77.0366048812866,
+          38.89784666877921
+        ]
+      },
+      "properties": {}
+    }
+  ]
+}
 
+];
+    var dc = {
+  "type": "Feature",
+  "properties": {},
+  "geometry": {
+    "type": "LineString",
+    "coordinates": [
+      [-77.031669, 38.878605],
+      [-77.029609, 38.881946],
+      [-77.020339, 38.884084],
+      [-77.025661, 38.885821],
+      [-77.021884, 38.889563],
+      [-77.019824, 38.892368]
+    ]
+  }
+};
 
+var map = L.mapbox.map('map-four', 'examples.map-i86l3621', {
+    scrollWheelZoom: false
+}).setView([38.8929,-77.0252], 14);
+
+var myLayer = L.mapbox.featureLayer().addTo(map);
+myLayer.setGeoJSON(geojson);
+myLayer.setGeoJSON(dc);
+
+var length = turf.lineDistance(dc, 'miles');
+console.log(length);   
+document.getElementById("demo").innerHTML=length;    
+    </script>
 </body>
 </html>
