@@ -1,65 +1,104 @@
   
+<!DOCTYPE html>
 <html>
-<title></title>
-<script src='//api.tiles.mapbox.com/mapbox.js/plugins/turf/v1.4.0/turf.min.js'></script>
-  <script src='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.js'></script>
-  <link href='https://api.tiles.mapbox.com/mapbox.js/v2.1.5/mapbox.css' rel='stylesheet' />
-  <style>
-    body { margin:0; padding:0; }
-    .map { position:absolute; top:50px; bottom:50px; width:100%; }
-  </style>
-
+<head>
+<meta charset=utf-8 />
+<title>Population Estimate Based on Buildings</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
+<script src='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
+<link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
+<style>
+  body { margin:0; padding:0; }
+  #map { position:absolute; top:0; bottom:0; width:100%; }
+</style>
+</head>
 <body>
-   <p id="demo"></p>
-<div id='map-four' class='map'> </div>
+
+
+<!-- add legend style -->
+<style>
+.legend label,
+.legend span {
+  display:block;
+  float:left;
+  height:15px;
+  width:20%;
+  text-align:center;
+  font-size:9px;
+  color:#808080;
+  }
+</style>
+
+<!-- Set the display of this container to none so we can
+     add it programmatically to `legendControl` -->
+<div id='legend' style='display:none;'>
+  <strong>The Population of the Area is ###</strong>
+  <nav class='legend clearfix'>
+	<span> <img src="https://d30y9cdsu7xlg0.cloudfront.net/png/2380-200.png" style= "width: 15px; height:15px;"> </span>   
+	<span> <img src="https://cdn4.iconfinder.com/data/icons/pictype-free-vector-icons/16/home-512.png" style= "width: 15px; height:15px;"> </span> 
+	<span> <img src="https://cdn2.iconfinder.com/data/icons/windows-8-metro-style/512/apartment.png" style= "width: 15px; height:15px;"> </span> 
+<span> <img src="http://www.iconpng.com/png/pictograms/factory.png" style= "width: 15px; height:15px;"> </span> 
+<span> <img src="http://www2.psd100.com/ppp/2013/09/2601/area-chart-icon-0926022035.png" style= "width: 15px; height:15px;"> </span> 
+    <label># Buildings</label>
+    <label># Houses</label>
+    <label># Apartment</label>
+    <label># Other</label>
+<label># Polygon</label>
+
+    <small>Source: <a href="www.openstreetmap.com">OpenStreetMap Buildings</a></small>
+</div>
+
+
+<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.css' rel='stylesheet' />
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.js'></script>
+<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-geodesy/v0.1.0/leaflet-geodesy.js'></script>
+<!-- Display Line Length -->
+
+
+<div id='map'></div>
+
 <script>
 L.mapbox.accessToken = 'pk.eyJ1IjoibWFwcGluZ3RoaW5ncyIsImEiOiJkSy1MRlNVIn0.jt2ol5HlgFaCdx4Ajn5WjA';
-var geojson = [
-  {
-  "type": "FeatureCollection",
-  "features": [
-    {
-      "type": "Feature",
-      "geometry": {
-        "type": "Point",
-        "coordinates": [
-          -77.0366048812866,
-          38.89784666877921
-        ]
-      },
-      "properties": {}
-    }
-  ]
+var map = L.mapbox.map('map', 'mapbox.light')
+    .setView([38.89399, -77.03659], 15);
+
+map.legendControl.addLegend(document.getElementById('legend').innerHTML);
+
+var featureGroup = L.featureGroup().addTo(map);
+
+var drawControl = new L.Control.Draw({
+  edit: {
+    featureGroup: featureGroup
+  },
+  draw: {
+    polygon: true,
+    polyline: false,
+    rectangle: false,
+    circle: false,
+    marker: false
+  }
+}).addTo(map);
+
+map.on('draw:created', showPolygonArea);
+map.on('draw:edited', showPolygonAreaEdited);
+
+function showPolygonAreaEdited(e) {
+  e.layers.eachLayer(function(layer) {
+    showPolygonArea({ layer: layer });
+  });
+}
+function showPolygonArea(e) {
+  featureGroup.clearLayers();
+  featureGroup.addLayer(e.layer);
+  e.layer.bindPopup((LGeo.area(e.layer) / 1000000).toFixed(2) + ' km<sup>2</sup>');
+  e.layer.openPopup();
+	var lengthpoly=e.layer.bindPopup((LGeo.area(e.layer) / 1000000).toFixed(2) + ' km<sup>2</sup>');
 }
 
-];
-    var dc = {
-  "type": "Feature",
-  "properties": {},
-  "geometry": {
-    "type": "LineString",
-    "coordinates": [
-      [-77.031669, 38.878605],
-      [-77.029609, 38.881946],
-      [-77.020339, 38.884084],
-      [-77.025661, 38.885821],
-      [-77.021884, 38.889563],
-      [-77.019824, 38.892368]
-    ]
-  }
-};
 
-var map = L.mapbox.map('map-four', 'mapbox.light', {
-    scrollWheelZoom: false
-}).setView([38.8929,-77.0252], 14);
 
-var myLayer = L.mapbox.featureLayer().addTo(map);
-myLayer.setGeoJSON(geojson);
-myLayer.setGeoJSON(dc);
+</script>
 
-var length = turf.lineDistance(dc, 'miles');
-console.log(length);   
-document.getElementById("demo").innerHTML=length;    
-    </script>
 </body>
 </html>
