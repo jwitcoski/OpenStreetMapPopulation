@@ -34,42 +34,8 @@ var mapToggle = L.mapbox.map('map-toggle')
   .setView([38.9, -77], 11)
   .addLayer(L.mapbox.tileLayer('mapbox.light'));
 
-var filters = document.getElementById('filters');
 
-var markers = L.mapbox.featureLayer().loadURL('/guides/data/examples/dc-weekend-picks.geojson');
 
-markers.on('ready', function(e) {
-  var typesObj = {}, types = [];
-  var features = e.target._geojson.features;
-  for (var i = 0; i < features.length; i++) {
-    typesObj[features[i].properties['marker-symbol']] = true;
-  }
-  for (var k in typesObj) types.push(k);
-  var checkboxes = [];
-  for (var i = 0; i < types.length; i++) {
-    var item = filters.appendChild(document.createElement('div'));
-    var checkbox = item.appendChild(document.createElement('input'));
-    var label = item.appendChild(document.createElement('label'));
-    checkbox.type = 'checkbox';
-    checkbox.id = types[i];
-    checkbox.checked = true;
-    label.innerHTML = types[i];
-    label.setAttribute('for', types[i]);
-    checkbox.addEventListener('change', update);
-    checkboxes.push(checkbox);
-  }
-
-  function update() {
-    var enabled = {};
-    for (var i = 0; i < checkboxes.length; i++) {
-      if (checkboxes[i].checked) enabled[checkboxes[i].id] = true;
-    }
-    markers.setFilter(function(feature) {
-      return (feature.properties['marker-symbol'] in enabled);
-    });
-  }
-}).addTo(mapToggle);
-mapToggle.scrollWheelZoom.disable();
 </script>
 </body>
 </html>
