@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html>
 <head>
@@ -29,7 +28,6 @@
   color:black;
 line-height:200%;
 
-  }
 .legend small {
   font-size:9px;
   color:black;
@@ -54,17 +52,25 @@ font-weight: bold;
     <label>##### Houses</label>
     <label>##### Apartment</label>
     <label>##### Comm./Ind.</label>
-<label>##### Polygon</label>
+<label> #### km Polygon</label>
 <br>
 <br>
 <br>
-<small>Population density of #Bolivia# Or #custom#</small> 
+<small>Population density of 
+	<select style="font-size: 9pt" name="country">  
+		<option value="United States">United States</option>
+  		<option value="Germany">Germany</option>
+  		<option value="another Country">Another Country</option>
+  		<option value="Custom">Custom</option>
+	</select>
+</small>
 <br>
-<span>###% Buildings are residences</span>
-<span>### per household</span>
-<span>###% Vacancy</span>
-<span>### per Apartment</span>
-<span>###% Buildings Mapped</span>
+<span><input style="font-size: 9pt" type="text" size="3" maxlength="3" value="100" name="Buildings_As_Residences">% Default Buildings are residences</span>
+<span><input style="font-size: 9pt" type="text" size="4" maxlength="4" value="5.0" name="Household_Size"> people per household</span>
+<span><input style="font-size: 9pt" type="text" size="3" maxlength="3" value="100" name="Vacancy_Rate">% Vacancy</span>
+<span><input style="font-size: 9pt" type="text" size="5" maxlength="5" value="100" name="Pop_Apartment"> people per Apartment Complex</span>
+<span><input style="font-size: 9pt" type="text" size="3" maxlength="3" value="100" name="Buildings_Mapped">% Buildings Mapped</span>
+<br>
 <br>
 <br>
 <br>
@@ -124,8 +130,6 @@ function showPolygonArea(e) {
   e.layer.openPopup();
 	var lengthpoly=e.layer.bindPopup((LGeo.area(e.layer) / 1000000).toFixed(2) + ' km<sup>2</sup>');
 }
-
-
 
 </script>
 
