@@ -58,16 +58,14 @@ async function main() {
   const status = await page.locator('#status').textContent();
   const population = await page.locator('#stat-population').textContent();
   const heatCount = await page.evaluate(() => {
-    const source = window.__buildingPop?.map?.getSource('population-heat');
-    return source?._data?.features?.length ?? 0;
+    return window.__buildingPop?.heatmap?.getFeatureCount?.() ?? 0;
   });
 
   await page.locator('#clear-polygon').tap();
   await page.waitForTimeout(200);
   const cleared = await page.evaluate(() => !window.__buildingPop.drawer.getPolygon());
   const heatCleared = await page.evaluate(() => {
-    const source = window.__buildingPop?.map?.getSource('population-heat');
-    return (source?._data?.features?.length ?? 0) === 0;
+    return (window.__buildingPop?.heatmap?.getFeatureCount?.() ?? 0) === 0;
   });
 
   console.log(JSON.stringify({ status, population, heatCount, cleared, heatCleared, pageErrors }, null, 2));

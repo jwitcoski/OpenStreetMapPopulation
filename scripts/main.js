@@ -163,7 +163,10 @@ async function main() {
 
         const { counts, buildings } = await fetchBuildingsInPolygon(
           feature.geometry,
-          { signal: activeController.signal }
+          {
+            signal: activeController.signal,
+            onStatus: (message) => setStatus(message, 'loading'),
+          }
         );
         latestCounts = counts;
         latestBuildings = buildings;

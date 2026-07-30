@@ -34,8 +34,16 @@ export const SEARCH_ZOOM = 15;
  */
 export const MAX_AREA_KM2 = 12;
 
-/** Public Overpass endpoint used to fetch OSM buildings. */
-export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+/** Public Overpass mirrors (tried in order on 504 / timeout). */
+export const OVERPASS_URLS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://lz4.overpass-api.de/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
+];
+
+/** @deprecated use OVERPASS_URLS — kept for older imports */
+export const OVERPASS_URL = OVERPASS_URLS[0];
 
 /** Photon geocoder (OpenStreetMap data, no API key). */
 export const PHOTON_URL = 'https://photon.komoot.io/api/';

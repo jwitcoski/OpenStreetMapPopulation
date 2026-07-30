@@ -149,8 +149,13 @@ export function createPopulationHeatmap(map) {
     latestBuildings = buildings ?? [];
     ensure();
     const source = map.getSource(SOURCE_ID);
-    if (!source) return;
-    source.setData(buildingsToHeatFeatures(latestBuildings, params));
+    if (!source) {
+      console.warn('Population heatmap source missing after ensure()');
+      return;
+    }
+    const data = buildingsToHeatFeatures(latestBuildings, params);
+    source.setData(data);
+    latestFeatureCount = data.features.length;
   }
 
   /** Re-weight existing buildings after form params change. */
@@ -161,11 +166,18 @@ export function createPopulationHeatmap(map) {
 
   function clear() {
     latestBuildings = [];
+    latestFeatureCount = 0;
     const source = map.getSource(SOURCE_ID);
     if (source) source.setData(emptyCollection());
   }
 
-  return { setBuildings, updateWeights, clear };
+  function getFeatureCount() {
+    return latestFeatureCount;
+  }
+
+  let latestFeatureCount = 0;
+
+  return { setBuildings, updateWeights, clear, getFeatureCount };
 }
 
 /**

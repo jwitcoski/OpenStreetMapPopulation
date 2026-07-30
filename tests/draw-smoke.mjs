@@ -78,9 +78,7 @@ async function main() {
 
       await new Promise((r) => setTimeout(r, 1500));
 
-      const heatSource = window.__buildingPop.map.getSource('population-heat');
-      const heatData = heatSource?._data;
-      const heatCount = heatData?.features?.length ?? 0;
+      const heatCount = window.__buildingPop.heatmap?.getFeatureCount?.() ?? 0;
 
       return {
         hasPolygon: !!drawer.getPolygon(),
