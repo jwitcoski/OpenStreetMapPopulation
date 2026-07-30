@@ -3,9 +3,10 @@
  * App entry point — wires map drawing to Overpass + population estimate.
  *
  * File map:
- *   styles/*                  CSS (variables, layout, panel)
+ *   styles/*                  CSS (variables, layout, panel, search)
  *   scripts/config.js         Zoom limits and building-type lists
  *   scripts/map.js            MapLibre map + draw tools
+ *   scripts/search.js         City / area search
  *   scripts/overpass.js       Fetch buildings from Overpass
  *   scripts/classify-buildings.js  Count houses / apartments / etc.
  *   scripts/population.js     Estimate residents from counts
@@ -15,12 +16,15 @@
 import '../styles/variables.css';
 import '../styles/layout.css';
 import '../styles/panel.css';
+import '../styles/search.css';
 
-import { MIN_ZOOM } from './config.js';
+import { TOOL_MIN_ZOOM } from './config.js';
 import {
   assertCityScaleArea,
   createMap,
   getDrawnPolygon,
+  isToolZoomOk,
+  setDrawToolEnabled,
 } from './map.js';
 import { fetchBuildingsInPolygon } from './overpass.js';
 import { estimatePopulation } from './population.js';
@@ -30,6 +34,7 @@ import {
   renderStats,
   setStatus,
 } from './panel.js';
+import { initPlaceSearch } from './search.js';
 
 /** Last successful building counts (used when form inputs change). */
 let latestCounts = null;
@@ -40,6 +45,9 @@ let latestAreaKm2 = null;
 /** AbortController for the in-flight Overpass request. */
 let activeController = null;
 
+const TOOL_DISABLED_NOTE =
+  `Zoom in to city level (z${TOOL_MIN_ZOOM}+) to draw. Overpass can only handle city-sized areas — not regions or countries.`;
+
 async function main() {
   const presets = await loadPresets();
   const { readParams } = initPanel(presets, {
@@ -47,10 +55,40 @@ async function main() {
   });
 
   const { map, draw } = createMap('map');
+  initPlaceSearch(map);
+
+  const toolBanner = document.getElementById('tool-banner');
+  const clearButton = document.getElementById('clear-polygon');
+
+  clearButton?.addEventListener('click', () => {
+    if (draw.getAll().features.length === 0) {
+      clearEstimate();
+      return;
+    }
+    draw.deleteAll();
+  });
+
+  function syncToolGate() {
+    const enabled = isToolZoomOk(map);
+    setDrawToolEnabled(draw, enabled);
+
+    if (toolBanner) {
+      toolBanner.hidden = enabled;
+    }
+
+    if (!enabled) {
+      setStatus(TOOL_DISABLED_NOTE);
+    } else if (!getDrawnPolygon(draw) && !latestCounts) {
+      setStatus('Draw a polygon over the area you want to estimate.');
+    }
+  }
 
   map.on('load', () => {
-    setStatus(`Zoom in to city level (z${MIN_ZOOM}+), then draw a polygon.`);
+    syncToolGate();
   });
+
+  map.on('zoomend', syncToolGate);
+  map.on('zoom', syncToolGate);
 
   map.on('draw.create', runEstimate);
   map.on('draw.update', runEstimate);
@@ -58,17 +96,22 @@ async function main() {
 
   /**
    * When the user draws or edits a polygon:
-   * 1. Check area is city-scale
+   * 1. Check zoom + area are city-scale
    * 2. Query Overpass for buildings
    * 3. Classify + estimate population
    * 4. Update the side panel
    */
   async function runEstimate() {
+    if (!isToolZoomOk(map)) {
+      draw.deleteAll();
+      syncToolGate();
+      return;
+    }
+
     const feature = getDrawnPolygon(draw);
 
     if (!feature) {
       clearEstimate();
-      setStatus('Draw a polygon over the area you want to estimate.');
       return;
     }
 
@@ -117,10 +160,16 @@ async function main() {
 
   function clearEstimate() {
     if (activeController) activeController.abort();
+
     latestCounts = null;
     latestAreaKm2 = null;
     renderStats({ population: null, counts: null, areaKm2: null });
-    setStatus('Polygon cleared. Draw another to estimate.');
+
+    if (!isToolZoomOk(map)) {
+      setStatus(TOOL_DISABLED_NOTE);
+    } else {
+      setStatus('Polygon cleared. Draw another to estimate.');
+    }
   }
 
   /** Re-run the math when the user tweaks form numbers (no new Overpass call). */

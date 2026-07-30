@@ -15,6 +15,7 @@ import {
   MAX_AREA_KM2,
   MAX_ZOOM,
   MIN_ZOOM,
+  TOOL_MIN_ZOOM,
 } from './config.js';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
@@ -78,12 +79,78 @@ export function createMap(containerId) {
       polygon: true,
       trash: true,
     },
-    defaultMode: 'draw_polygon',
+    // Start in select mode so the trash button can delete a drawn polygon.
+    defaultMode: 'simple_select',
   });
 
   map.addControl(draw, 'top-left');
 
+  // MapboxDraw's trash only deletes *selected* features. After drawing,
+  // select the new polygon so trash works. Also make trash clear all
+  // polygons if nothing is selected (common mobile frustration).
+  map.on('draw.create', (event) => {
+    const created = event.features?.[0];
+    if (!created?.id) return;
+    draw.changeMode('simple_select', { featureIds: [created.id] });
+  });
+
+  wireReliableTrashButton(draw);
+
   return { map, draw };
+}
+
+/**
+ * Make the trash control always clear polygons, even if nothing is selected.
+ */
+function wireReliableTrashButton(draw) {
+  const trashButton = document.querySelector('.mapbox-gl-draw_trash');
+  if (!trashButton || trashButton.dataset.clearWired === 'true') return;
+
+  trashButton.dataset.clearWired = 'true';
+  trashButton.title = 'Delete drawn area';
+  trashButton.setAttribute('aria-label', 'Delete drawn area');
+
+  trashButton.addEventListener(
+    'click',
+    (event) => {
+      // If a feature is selected, let MapboxDraw's normal trash behavior run.
+      if (draw.getSelectedIds().length > 0) return;
+
+      event.preventDefault();
+      event.stopImmediatePropagation();
+
+      if (draw.getAll().features.length === 0) return;
+      draw.deleteAll();
+    },
+    true
+  );
+}
+
+/**
+ * Enable or disable the polygon draw tool based on zoom.
+ * When disabled, users can still pan / zoom / search the map.
+ */
+export function setDrawToolEnabled(draw, enabled) {
+  const drawRoot = document.querySelector('.mapbox-gl-draw');
+  if (drawRoot) {
+    drawRoot.classList.toggle('is-disabled', !enabled);
+  }
+
+  document.body.classList.toggle('is-tool-disabled', !enabled);
+
+  if (!enabled) {
+    // Leave any finished polygon in place, but cancel in-progress drawing.
+    try {
+      draw.changeMode('simple_select');
+    } catch {
+      // Ignore mode errors during early map init.
+    }
+  }
+}
+
+/** True when the current zoom is high enough for Overpass queries. */
+export function isToolZoomOk(map) {
+  return map.getZoom() >= TOOL_MIN_ZOOM;
 }
 
 /**

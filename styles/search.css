@@ -1,0 +1,123 @@
+/*
+ * search.css
+ * Place search box + zoom-gate banner over the map.
+ */
+
+.place-search {
+  position: absolute;
+  z-index: 3;
+  top: 0.75rem;
+  left: 3.5rem;
+  right: max(1rem, calc(100vw - 360px - 2.5rem));
+  max-width: 360px;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.place-search__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.place-search__input {
+  width: 100%;
+  border: 1px solid var(--panel-border);
+  border-radius: 12px;
+  padding: 0.7rem 0.85rem;
+  font: inherit;
+  font-size: 0.95rem;
+  color: var(--ink);
+  background: rgba(247, 244, 238, 0.96);
+  box-shadow: var(--shadow);
+}
+
+.place-search__input:focus {
+  outline: 2px solid rgba(15, 107, 92, 0.35);
+  border-color: var(--accent);
+}
+
+.place-search__results {
+  list-style: none;
+  margin: 0;
+  padding: 0.35rem;
+  border-radius: 12px;
+  background: rgba(247, 244, 238, 0.98);
+  border: 1px solid var(--panel-border);
+  box-shadow: var(--shadow);
+  max-height: 240px;
+  overflow: auto;
+}
+
+.place-search__results li {
+  margin: 0;
+}
+
+.place-search__result {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 8px;
+  padding: 0.65rem 0.7rem;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+
+.place-search__result:hover,
+.place-search__result:focus {
+  background: var(--accent-soft);
+  outline: none;
+}
+
+.place-search__empty {
+  padding: 0.65rem 0.7rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.tool-banner {
+  position: absolute;
+  z-index: 3;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%);
+  width: min(520px, calc(100vw - 2rem));
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
+  background: rgba(26, 36, 33, 0.92);
+  color: #f7f4ee;
+  font-size: 0.88rem;
+  line-height: 1.4;
+  text-align: center;
+  box-shadow: var(--shadow);
+  animation: panel-in 320ms ease-out;
+}
+
+/* Dim / block draw controls when zoomed out too far for Overpass */
+.mapbox-gl-draw.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+@media (max-width: 720px) {
+  .place-search {
+    left: 0.75rem;
+    right: 0.75rem;
+    max-width: none;
+  }
+
+  .tool-banner {
+    bottom: calc(48vh + 0.75rem);
+    font-size: 0.82rem;
+  }
+}

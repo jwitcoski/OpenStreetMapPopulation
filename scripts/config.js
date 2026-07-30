@@ -4,17 +4,29 @@
  * Change zoom / area limits here — nowhere else.
  */
 
-/** Lowest zoom the map allows (city / neighborhood, not region). */
-export const MIN_ZOOM = 13;
+/**
+ * How far out the map can zoom for browsing (world / country ok).
+ * Drawing / Overpass queries still require TOOL_MIN_ZOOM.
+ */
+export const MIN_ZOOM = 2;
 
 /** Highest zoom the map allows. */
 export const MAX_ZOOM = 19;
+
+/**
+ * Minimum zoom before the draw / estimate tool is enabled.
+ * Below this, users can pan the map but cannot query Overpass.
+ */
+export const TOOL_MIN_ZOOM = 13;
 
 /** Starting view: [longitude, latitude]. */
 export const DEFAULT_CENTER = [-77.03659, 38.89399]; // Washington, DC
 
 /** Starting zoom level. */
 export const DEFAULT_ZOOM = 15;
+
+/** Zoom used after picking a city from search. */
+export const SEARCH_ZOOM = 15;
 
 /**
  * Largest polygon area we will send to Overpass (square kilometers).
@@ -24,6 +36,9 @@ export const MAX_AREA_KM2 = 12;
 
 /** Public Overpass endpoint used to fetch OSM buildings. */
 export const OVERPASS_URL = 'https://overpass-api.de/api/interpreter';
+
+/** Photon geocoder (OpenStreetMap data, no API key). */
+export const PHOTON_URL = 'https://photon.komoot.io/api/';
 
 /** OSM building=* values counted as single-family / house-like. */
 export const HOUSE_TYPES = new Set([
