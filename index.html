@@ -1,137 +1,148 @@
 <!DOCTYPE html>
-<html>
-<head>
-<meta charset=utf-8 />
-<title>Population Estimate Based on Buildings</title>
-<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
-<script src='https://api.mapbox.com/mapbox.js/plugins/turf/v2.0.2/turf.min.js'></script>
-<script src='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.js'></script>
-<link href='https://api.mapbox.com/mapbox.js/v2.2.1/mapbox.css' rel='stylesheet' />
-<style>
-  body { margin:0; padding:0; }
-  #map { position:absolute; top:0; bottom:0; width:100%; }
-</style>
-</head>
-<body>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Population Estimate Based on Buildings</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="map"></div>
 
+    <aside id="panel" class="panel" aria-label="Population estimate controls">
+      <header class="panel__header">
+        <p class="panel__brand">BuildingPop</p>
+        <h1 class="panel__title">Population estimate</h1>
+        <p class="panel__lede">
+          Draw a city-scale polygon to count OSM buildings and estimate residents.
+        </p>
+      </header>
 
-<!-- add legend style -->
-<style>
-.legend label,
-.legend span {
-  display:block;
-  float:left;
-  height:15px;
-  width:20%;
-  text-align:center;
-  font-size:9px;
-  color:black;
-line-height:200%;
+      <div class="panel__stats" id="stats">
+        <div class="stat">
+          <span class="stat__label">Population</span>
+          <span class="stat__value" id="stat-population">—</span>
+        </div>
+        <div class="stat-grid">
+          <div class="stat stat--small">
+            <span class="stat__label">Buildings</span>
+            <span class="stat__value" id="stat-buildings">—</span>
+          </div>
+          <div class="stat stat--small">
+            <span class="stat__label">Houses</span>
+            <span class="stat__value" id="stat-houses">—</span>
+          </div>
+          <div class="stat stat--small">
+            <span class="stat__label">Apartments</span>
+            <span class="stat__value" id="stat-apartments">—</span>
+          </div>
+          <div class="stat stat--small">
+            <span class="stat__label">Comm./Ind.</span>
+            <span class="stat__value" id="stat-commercial">—</span>
+          </div>
+          <div class="stat stat--small">
+            <span class="stat__label">Other</span>
+            <span class="stat__value" id="stat-other">—</span>
+          </div>
+          <div class="stat stat--small">
+            <span class="stat__label">Area</span>
+            <span class="stat__value" id="stat-area">—</span>
+          </div>
+        </div>
+      </div>
 
-.legend small {
-  font-size:9px;
-  color:black;
-text-align:center;
- float:center;
-font-weight: bold;
-}
+      <p class="panel__status" id="status" role="status"></p>
 
-</style>
+      <form class="panel__form" id="params-form">
+        <label class="field">
+          <span>Demographics preset</span>
+          <select id="preset" name="preset"></select>
+        </label>
 
-<!-- Set the display of this container to none so we can
-     add it programmatically to `legendControl` -->
-<div id='legend' style='display:none;'>
-  <strong>The Population of the Area is ###</strong>
-  <nav class='legend clearfix'>
-	<span> <img src="https://d30y9cdsu7xlg0.cloudfront.net/png/2380-200.png" style= "width: 15px; height:15px;"> </span>   
-	<span> <img src="https://cdn4.iconfinder.com/data/icons/pictype-free-vector-icons/16/home-512.png" style= "width: 15px; height:15px;"> </span> 
-	<span> <img src="https://cdn2.iconfinder.com/data/icons/windows-8-metro-style/512/apartment.png" style= "width: 15px; height:15px;"> </span> 
-<span> <img src="http://www.iconpng.com/png/pictograms/factory.png" style= "width: 15px; height:15px;"> </span> 
-<span> <img src="http://www2.psd100.com/ppp/2013/09/2601/area-chart-icon-0926022035.png" style= "width: 15px; height:15px;"> </span> 
-    <label>##### Buildings</label>
-    <label>##### Houses</label>
-    <label>##### Apartment</label>
-    <label>##### Comm./Ind.</label>
-<label> #### km Polygon</label>
-<br>
-<br>
-<br>
-<small>Population density of 
-	<select style="font-size: 9pt" name="country">  
-		<option value="United States">United States</option>
-  		<option value="Germany">Germany</option>
-  		<option value="another Country">Another Country</option>
-  		<option value="Custom">Custom</option>
-	</select>
-</small>
-<br>
-<span><input style="font-size: 9pt" type="text" size="3" maxlength="3" value="100" name="Buildings_As_Residences">% Default Buildings are residences</span>
-<span><input style="font-size: 9pt" type="text" size="4" maxlength="4" value="5.0" name="Household_Size"> people per household</span>
-<span><input style="font-size: 9pt" type="text" size="3" maxlength="3" value="100" name="Vacancy_Rate">% Vacancy</span>
-<span><input style="font-size: 9pt" type="text" size="5" maxlength="5" value="100" name="Pop_Apartment"> people per Apartment Complex</span>
-<span><input style="font-size: 9pt" type="text" size="3" maxlength="3" value="100" name="Buildings_Mapped">% Buildings Mapped</span>
-<br>
-<br>
-<br>
-<br>
-<small>Population Estimate Calculation</small>
-<br>
-<small><img src="http://lifedreamssolutions.ca/wp-content/uploads/2012/05/Corporate-Wellness-Icon.png"style= "width: 15px; height:15px;">
- = (<img src="https://cdn2.iconfinder.com/data/icons/windows-8-metro-style/512/apartment.png" style= "width: 15px; height:15px;">
-  +(((<img src="https://cdn4.iconfinder.com/data/icons/pictype-free-vector-icons/16/home-512.png" style= "width: 15px; height:15px;"> + <img src="https://d30y9cdsu7xlg0.cloudfront.net/png/2380-200.png" style= "width: 15px; height:15px;">)
-)Vacancy)Household Size)% Mapped</small>
-<br>
-<small>Buildings <a href="www.openstreetmap.com">OpenStreetMap</a> <br> Demographics <a href="http://unstats.un.org/unsd/demographic/sconcerns/housing/chss1995.htm">UN Stats</a></small>
-</div>
+        <label class="field">
+          <span>Default buildings as residences (%)</span>
+          <input
+            id="pct-residential"
+            name="pctResidential"
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value="80"
+          />
+        </label>
 
+        <label class="field">
+          <span>People per household</span>
+          <input
+            id="household-size"
+            name="householdSize"
+            type="number"
+            min="0.1"
+            max="20"
+            step="0.1"
+            value="2.5"
+          />
+        </label>
 
-<link href='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.css' rel='stylesheet' />
-<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-draw/v0.2.2/leaflet.draw.js'></script>
-<script src='https://api.mapbox.com/mapbox.js/plugins/leaflet-geodesy/v0.1.0/leaflet-geodesy.js'></script>
-<!-- Display Line Length -->
+        <label class="field">
+          <span>Occupancy (%)</span>
+          <input
+            id="occupancy"
+            name="occupancy"
+            type="number"
+            min="0"
+            max="100"
+            step="1"
+            value="90"
+          />
+        </label>
 
+        <label class="field">
+          <span>People per apartment building</span>
+          <input
+            id="apartment-pop"
+            name="apartmentPop"
+            type="number"
+            min="0"
+            max="5000"
+            step="1"
+            value="40"
+          />
+        </label>
 
-<div id='map'></div>
+        <label class="field">
+          <span>Buildings mapped (%)</span>
+          <input
+            id="pct-mapped"
+            name="pctMapped"
+            type="number"
+            min="1"
+            max="100"
+            step="1"
+            value="100"
+          />
+        </label>
+      </form>
 
-<script>
-L.mapbox.accessToken = 'pk.eyJ1IjoibWFwcGluZ3RoaW5ncyIsImEiOiJkSy1MRlNVIn0.jt2ol5HlgFaCdx4Ajn5WjA';
-var map = L.mapbox.map('map', 'mappingthings.fb86ad4d')
-    .setView([38.89399, -77.03659], 15);
+      <p class="panel__formula">
+        Estimate = (apartments × people/apt + (houses + other × residential%) × occupancy × household size) × mapped%
+      </p>
 
-map.legendControl.addLegend(document.getElementById('legend').innerHTML);
+      <footer class="panel__footer">
+        Buildings from
+        <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener"
+          >OpenStreetMap</a
+        >
+        via Overpass. City-level zoom only.
+      </footer>
+    </aside>
 
-var featureGroup = L.featureGroup().addTo(map);
-
-var drawControl = new L.Control.Draw({
-  edit: {
-    featureGroup: featureGroup
-  },
-  draw: {
-    polygon: true,
-    polyline: false,
-    rectangle: false,
-    circle: false,
-    marker: false
-  }
-}).addTo(map);
-
-map.on('draw:created', showPolygonArea);
-map.on('draw:edited', showPolygonAreaEdited);
-
-function showPolygonAreaEdited(e) {
-  e.layers.eachLayer(function(layer) {
-    showPolygonArea({ layer: layer });
-  });
-}
-function showPolygonArea(e) {
-  featureGroup.clearLayers();
-  featureGroup.addLayer(e.layer);
-  e.layer.bindPopup((LGeo.area(e.layer) / 1000000).toFixed(2) + ' km<sup>2</sup>');
-  e.layer.openPopup();
-	var lengthpoly=e.layer.bindPopup((LGeo.area(e.layer) / 1000000).toFixed(2) + ' km<sup>2</sup>');
-}
-
-</script>
-
-</body>
+    <script type="module" src="/src/main.js"></script>
+  </body>
 </html>
