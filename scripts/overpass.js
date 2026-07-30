@@ -4,11 +4,11 @@
  *
  * Public Overpass instances rate-limit aggressively (429) and sometimes
  * return 504 when busy. We:
- *   - cache recent polygon results (avoids repeat downloads)
+ *   - cache recent non-empty polygon results (avoids repeat downloads)
  *   - enforce a client-side gap between live requests
- *   - on 429, wait (Retry-After) instead of blasting every mirror
+ *   - on 429, wait (Retry-After) and retry the same server before failing over
  *   - on 502/503/504, fail over to an independent mirror after a pause
- *   - never treat gateway failures as “no buildings”
+ *   - never treat 429/504 fallout as “no buildings found”
  */
 
 import { OVERPASS_URLS } from './config.js';
@@ -18,7 +18,13 @@ import { classifyBuildings } from './classify-buildings.js';
 const FAILOVER_STATUS = new Set([502, 503, 504]);
 
 /** Minimum time between live Overpass calls from this browser tab. */
-const MIN_REQUEST_GAP_MS = 8000;
+const MIN_REQUEST_GAP_MS = 10000;
+
+/** Default wait when Overpass says 429 but omits Retry-After. */
+const DEFAULT_RETRY_AFTER_MS = 20000;
+
+/** Tries per mirror before moving on (helps with 429). */
+const TRIES_PER_ENDPOINT = 2;
 
 /** How long cached polygon results stay valid. */
 const CACHE_TTL_MS = 15 * 60 * 1000;
@@ -115,6 +121,8 @@ export async function fetchBuildingsInPolygon(
   const body = `data=${encodeURIComponent(query)}`;
 
   let lastError = null;
+  let sawRateLimit = false;
+  let sawServerTrouble = false;
 
   for (let attempt = 0; attempt < endpoints.length; attempt += 1) {
     if (signal?.aborted) {
@@ -128,54 +136,94 @@ export async function fetchBuildingsInPolygon(
       onStatus?.(
         `Trying another Overpass server (${attempt + 1}/${endpoints.length})…`
       );
-      await wait(1500 * attempt, signal);
+      await wait(2000 * attempt, signal);
     }
 
-    try {
-      lastLiveRequestAt = now();
-      const { data } = await postOverpass(endpoint, body, signal);
-
-      if (data.remark || data.error) {
-        lastError = createOverpassError(
-          String(data.remark || data.error),
-          { status: 504 }
-        );
-        continue;
+    for (let tryNum = 0; tryNum < TRIES_PER_ENDPOINT; tryNum += 1) {
+      if (signal?.aborted) {
+        throw new DOMException('Aborted', 'AbortError');
       }
 
-      // A real Overpass success always includes an elements array.
-      // Missing/invalid payloads (proxies, HTML-as-JSON failures) are NOT
-      // “zero buildings” — treat them as retryable Overpass failures.
-      if (!Array.isArray(data.elements)) {
-        lastError = createOverpassError(
-          'Overpass returned an invalid response.',
-          { status: 502 }
-        );
-        continue;
+      try {
+        lastLiveRequestAt = now();
+        const { data } = await postOverpass(endpoint, body, signal);
+
+        if (data.remark || data.error) {
+          const detail = String(data.remark || data.error);
+          if (isRateLimitMessage(detail)) {
+            sawRateLimit = true;
+            lastError = createOverpassError(detail, { status: 429 });
+            const retryAfterMs = DEFAULT_RETRY_AFTER_MS;
+            onStatus?.(
+              `Overpass rate limit hit — waiting ${Math.ceil(retryAfterMs / 1000)}s…`
+            );
+            await wait(retryAfterMs, signal);
+            continue;
+          }
+
+          sawServerTrouble = true;
+          lastError = createOverpassError(detail, { status: 504 });
+          break;
+        }
+
+        // A real Overpass success always includes an elements array.
+        if (!Array.isArray(data.elements)) {
+          sawServerTrouble = true;
+          lastError = createOverpassError(
+            'Overpass returned an invalid response.',
+            { status: 502 }
+          );
+          break;
+        }
+
+        // After 429/504, an empty payload is usually a bad/partial answer —
+        // never report that as “no buildings found”.
+        if (
+          data.elements.length === 0 &&
+          (sawRateLimit || sawServerTrouble)
+        ) {
+          lastError = createOverpassError(
+            sawRateLimit
+              ? 'Overpass rate limit (429). Do you want to try again?'
+              : 'Overpass failed to run. Do you want to try again?',
+            { status: sawRateLimit ? 429 : 504 }
+          );
+          break;
+        }
+
+        const result = classifyBuildings(data.elements);
+
+        // Only cache non-empty results so a bad empty reply cannot stick.
+        if (result.counts.total > 0) {
+          resultCache.set(cacheKey, { savedAt: now(), result });
+          trimCache();
+        }
+
+        return result;
+      } catch (error) {
+        if (error.name === 'AbortError') throw error;
+        lastError = error;
+
+        if (error.status === 429 || isRateLimitMessage(error.message)) {
+          sawRateLimit = true;
+          const retryAfterMs =
+            retryAfterMilliseconds(error.retryAfter) ?? DEFAULT_RETRY_AFTER_MS;
+          onStatus?.(
+            `Overpass rate limit hit — waiting ${Math.ceil(retryAfterMs / 1000)}s…`
+          );
+          await wait(retryAfterMs, signal);
+          continue;
+        }
+
+        if (!isFailoverError(error)) throw error;
+
+        sawServerTrouble = true;
+        break;
       }
-
-      const result = classifyBuildings(data.elements);
-      resultCache.set(cacheKey, { savedAt: now(), result });
-      trimCache();
-      return result;
-    } catch (error) {
-      if (error.name === 'AbortError') throw error;
-      lastError = error;
-
-      if (error.status === 429) {
-        const retryAfterMs = retryAfterMilliseconds(error.retryAfter) ?? 12000;
-        onStatus?.(
-          `Overpass rate limit hit — waiting ${Math.ceil(retryAfterMs / 1000)}s…`
-        );
-        await wait(retryAfterMs, signal);
-        continue;
-      }
-
-      if (!isFailoverError(error)) throw error;
     }
   }
 
-  throw finalizeOverpassFailure(lastError);
+  throw finalizeOverpassFailure(lastError, { sawRateLimit, sawServerTrouble });
 }
 
 /**
@@ -204,9 +252,11 @@ export async function postOverpass(endpoint, body, signal) {
 
   if (!response.ok) {
     throw createOverpassError(
-      response.status === 504
-        ? 'Overpass timed out (504).'
-        : `Overpass request failed (${response.status}).`,
+      response.status === 429
+        ? 'Overpass rate limit (429).'
+        : response.status === 504
+          ? 'Overpass timed out (504).'
+          : `Overpass request failed (${response.status}).`,
       {
         status: response.status,
         retryAfter: response.headers.get('Retry-After'),
@@ -233,17 +283,22 @@ export function clearOverpassCache() {
   lastLiveRequestAt = 0;
 }
 
-function finalizeOverpassFailure(lastError) {
-  if (lastError?.status === 429) {
+function finalizeOverpassFailure(
+  lastError,
+  { sawRateLimit = false, sawServerTrouble = false } = {}
+) {
+  if (sawRateLimit || lastError?.status === 429) {
     return createOverpassError(
-      'Overpass rate limit (429). Wait about a minute, then try again?',
-      { status: 429, retryAfter: lastError.retryAfter }
+      'Overpass rate limit (429). Too many requests — do you want to try again?',
+      { status: 429, retryAfter: lastError?.retryAfter }
     );
   }
 
   const status = lastError?.status;
   const detail =
-    status === 504 || /504|timeout|busy/i.test(lastError?.message || '')
+    status === 504 ||
+    sawServerTrouble ||
+    /504|timeout|busy/i.test(lastError?.message || '')
       ? 'Overpass timed out or is busy (504).'
       : lastError?.message || 'Overpass request failed.';
 
@@ -251,6 +306,10 @@ function finalizeOverpassFailure(lastError) {
     `Overpass failed to run. ${detail} Do you want to try again?`,
     { status, cause: lastError }
   );
+}
+
+function isRateLimitMessage(message) {
+  return /429|rate.?limit|too many requests|quota/i.test(message || '');
 }
 
 function isFailoverError(error) {

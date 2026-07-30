@@ -116,12 +116,54 @@ try {
 } catch (error) {
   failed = error;
 }
-globalThis.fetch = originalFetch;
 
 assert(failed, 'should throw when still rate limited');
 assert(/429|rate limit/i.test(failed.message), failed.message);
 assert(failed.code === 'OVERPASS_FAILED', 'should use OVERPASS_FAILED code');
+assert(/try again/i.test(failed.message), failed.message);
+assert(!/no buildings/i.test(failed.message), '429 must not say no buildings');
 console.log('PASS overpass 429 exhausted message');
+
+// 429 then empty 200 must NOT become “no buildings”
+clearOverpassCache();
+calls = 0;
+now = 2_500_000;
+globalThis.fetch = async () => {
+  calls += 1;
+  if (calls === 1) {
+    return {
+      ok: false,
+      status: 429,
+      headers: { get: (name) => (name === 'Retry-After' ? '1' : null) },
+      json: async () => ({}),
+    };
+  }
+  return {
+    ok: true,
+    status: 200,
+    headers: { get: () => null },
+    json: async () => ({ elements: [] }),
+  };
+};
+
+let failedEmptyAfter429 = null;
+try {
+  await fetchBuildingsInPolygon(geometry, {
+    endpoints: [endpoints[0]],
+    now: () => now,
+  });
+} catch (error) {
+  failedEmptyAfter429 = error;
+}
+
+assert(failedEmptyAfter429, 'empty after 429 should throw');
+assert(failedEmptyAfter429.code === 'OVERPASS_FAILED', 'empty-after-429 code');
+assert(/429|rate limit/i.test(failedEmptyAfter429.message), failedEmptyAfter429.message);
+assert(
+  !/no buildings/i.test(failedEmptyAfter429.message),
+  'empty after 429 must not say no buildings'
+);
+console.log('PASS overpass empty-after-429 is failure');
 
 // Exhausted 504s must NOT look like “no buildings”
 clearOverpassCache();
@@ -165,6 +207,22 @@ try {
   failedInvalid = error;
 }
 
+// Genuine empty area (no prior 429) is allowed.
+clearOverpassCache();
+calls = 0;
+now = 5_000_000;
+globalThis.fetch = async () => ({
+  ok: true,
+  status: 200,
+  headers: { get: () => null },
+  json: async () => ({ elements: [] }),
+});
+
+const genuineEmpty = await fetchBuildingsInPolygon(geometry, {
+  endpoints: [endpoints[0]],
+  now: () => now,
+});
+
 globalThis.fetch = originalFetch;
 
 assert(failed504, 'should throw on 504');
@@ -177,7 +235,9 @@ assert(failedInvalid, 'should throw on invalid JSON payload');
 assert(failedInvalid.code === 'OVERPASS_FAILED', 'invalid payload code');
 assert(!/no buildings/i.test(failedInvalid.message), 'invalid must not say no buildings');
 
-console.log('PASS overpass 504 + invalid payload messaging');
+assert(genuineEmpty.counts.total === 0, 'genuine empty area still allowed');
+
+console.log('PASS overpass 504 + invalid + genuine-empty messaging');
 
 function assert(condition, message) {
   if (!condition) {

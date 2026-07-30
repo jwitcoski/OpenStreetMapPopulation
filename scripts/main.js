@@ -286,14 +286,20 @@ async function main() {
         const isOverpassFailure =
           error.code === OVERPASS_FAILED ||
           error.name === 'OverpassError' ||
-          /overpass|504|502|503|429|rate limit|timeout|busy|network error/i.test(
+          /overpass|504|502|503|429|rate limit|too many requests|timeout|busy|network error/i.test(
             error.message || ''
           );
 
+        const retryMessage = /429|rate limit|too many requests/i.test(
+          error.message || ''
+        )
+          ? 'Overpass rate limit (429). Too many requests — do you want to try again?'
+          : error.message ||
+            'Overpass failed to run. Do you want to try again?';
+
         setStatus(
           isOverpassFailure
-            ? error.message ||
-                'Overpass failed to run. Do you want to try again?'
+            ? retryMessage
             : error.message || 'Building query failed.',
           'error',
           { showRetry: isOverpassFailure && !!latestFeature }
