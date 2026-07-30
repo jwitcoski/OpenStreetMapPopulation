@@ -17,8 +17,8 @@
       App styles are loaded from scripts/main.js so Vite can bundle them.
       See styles/ for the human-readable CSS source files.
     -->
-    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-CIGVcOWg.js"></script>
-    <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-kuKK2gxn.css">
+    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-nwuFcMcF.js"></script>
+    <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-CtMegPPm.css">
   </head>
   <body>
     <!-- Full-screen map canvas (MapLibre mounts here) -->
@@ -105,6 +105,15 @@
         <button type="button" id="clear-polygon" class="panel__action panel__action--muted">
           Clear
         </button>
+      </div>
+
+      <div class="heat-legend" aria-hidden="true">
+        <span class="heat-legend__label">Population heat</span>
+        <div class="heat-legend__bar"></div>
+        <div class="heat-legend__ends">
+          <span>Low</span>
+          <span>High</span>
+        </div>
       </div>
 
       <!-- User-tunable estimate inputs -->
