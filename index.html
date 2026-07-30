@@ -91,7 +91,12 @@
       </section>
 
       <!-- Short status line (loading, errors, tips) -->
-      <p class="panel__status" id="status" role="status"></p>
+      <div class="panel__status-row">
+        <p class="panel__status" id="status" role="status"></p>
+        <button type="button" id="retry-overpass" class="panel__retry" hidden>
+          Try again
+        </button>
+      </div>
 
       <div class="panel__actions">
         <button type="button" id="draw-polygon" class="panel__action" data-requires-tool>

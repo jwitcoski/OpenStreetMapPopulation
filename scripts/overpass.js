@@ -8,6 +8,7 @@
  *   - enforce a client-side gap between live requests
  *   - on 429, wait (Retry-After) instead of blasting every mirror
  *   - on 502/503/504, fail over to an independent mirror after a pause
+ *   - never treat gateway failures as “no buildings”
  */
 
 import { OVERPASS_URLS } from './config.js';
@@ -27,6 +28,23 @@ const resultCache = new Map();
 
 /** Timestamp of the last live (non-cache) Overpass request start. */
 let lastLiveRequestAt = 0;
+
+export const OVERPASS_FAILED = 'OVERPASS_FAILED';
+
+/**
+ * @param {string} message
+ * @param {{ status?: number, retryAfter?: string | null, cause?: unknown }} [extras]
+ */
+export function createOverpassError(message, extras = {}) {
+  const error = new Error(message);
+  error.name = 'OverpassError';
+  error.code = OVERPASS_FAILED;
+  error.retryable = true;
+  if (extras.status != null) error.status = extras.status;
+  if (extras.retryAfter != null) error.retryAfter = extras.retryAfter;
+  if (extras.cause != null) error.cause = extras.cause;
+  return error;
+}
 
 /**
  * Convert a GeoJSON polygon into Overpass poly:"lat lon lat lon ..." syntax.
@@ -115,14 +133,28 @@ export async function fetchBuildingsInPolygon(
 
     try {
       lastLiveRequestAt = now();
-      const { data, response } = await postOverpass(endpoint, body, signal);
+      const { data } = await postOverpass(endpoint, body, signal);
 
-      if (data.remark) {
-        lastError = new Error(data.remark);
+      if (data.remark || data.error) {
+        lastError = createOverpassError(
+          String(data.remark || data.error),
+          { status: 504 }
+        );
         continue;
       }
 
-      const result = classifyBuildings(data.elements ?? []);
+      // A real Overpass success always includes an elements array.
+      // Missing/invalid payloads (proxies, HTML-as-JSON failures) are NOT
+      // “zero buildings” — treat them as retryable Overpass failures.
+      if (!Array.isArray(data.elements)) {
+        lastError = createOverpassError(
+          'Overpass returned an invalid response.',
+          { status: 502 }
+        );
+        continue;
+      }
+
+      const result = classifyBuildings(data.elements);
       resultCache.set(cacheKey, { savedAt: now(), result });
       trimCache();
       return result;
@@ -136,7 +168,6 @@ export async function fetchBuildingsInPolygon(
           `Overpass rate limit hit — waiting ${Math.ceil(retryAfterMs / 1000)}s…`
         );
         await wait(retryAfterMs, signal);
-        // One more attempt on the next mirror (or same if last) after waiting.
         continue;
       }
 
@@ -144,18 +175,7 @@ export async function fetchBuildingsInPolygon(
     }
   }
 
-  if (lastError?.status === 429) {
-    throw new Error(
-      'Overpass rate limit (429). Wait about a minute, then try again — repeated draws reuse cache when possible.'
-    );
-  }
-
-  throw new Error(
-    lastError?.status === 504 || /504|timeout|busy/i.test(lastError?.message || '')
-      ? 'Overpass servers are busy. Wait a few seconds and try again.'
-      : lastError?.message ||
-          'Overpass request failed. Wait a few seconds and try again.'
-  );
+  throw finalizeOverpassFailure(lastError);
 }
 
 /**
@@ -177,21 +197,33 @@ export async function postOverpass(endpoint, body, signal) {
     });
   } catch (error) {
     if (error.name === 'AbortError') throw error;
-    const wrapped = new Error(`Network error contacting Overpass`);
-    wrapped.cause = error;
-    wrapped.retryable = true;
-    throw wrapped;
+    throw createOverpassError('Network error contacting Overpass', {
+      cause: error,
+    });
   }
 
   if (!response.ok) {
-    const error = new Error(`Overpass request failed (${response.status})`);
-    error.status = response.status;
-    error.retryAfter = response.headers.get('Retry-After');
-    error.retryable = FAILOVER_STATUS.has(response.status) || response.status === 429;
-    throw error;
+    throw createOverpassError(
+      response.status === 504
+        ? 'Overpass timed out (504).'
+        : `Overpass request failed (${response.status}).`,
+      {
+        status: response.status,
+        retryAfter: response.headers.get('Retry-After'),
+      }
+    );
   }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (error) {
+    throw createOverpassError('Overpass returned a non-JSON response.', {
+      status: response.status,
+      cause: error,
+    });
+  }
+
   return { data, response };
 }
 
@@ -201,11 +233,34 @@ export function clearOverpassCache() {
   lastLiveRequestAt = 0;
 }
 
+function finalizeOverpassFailure(lastError) {
+  if (lastError?.status === 429) {
+    return createOverpassError(
+      'Overpass rate limit (429). Wait about a minute, then try again?',
+      { status: 429, retryAfter: lastError.retryAfter }
+    );
+  }
+
+  const status = lastError?.status;
+  const detail =
+    status === 504 || /504|timeout|busy/i.test(lastError?.message || '')
+      ? 'Overpass timed out or is busy (504).'
+      : lastError?.message || 'Overpass request failed.';
+
+  return createOverpassError(
+    `Overpass failed to run. ${detail} Do you want to try again?`,
+    { status, cause: lastError }
+  );
+}
+
 function isFailoverError(error) {
   return Boolean(
-    error.retryable ||
+    error.code === OVERPASS_FAILED ||
+      error.retryable ||
       FAILOVER_STATUS.has(error.status) ||
-      /504|503|502|timeout|busy|Network error/i.test(error.message || '')
+      /504|503|502|timeout|busy|Network error|non-JSON|invalid response/i.test(
+        error.message || ''
+      )
   );
 }
 

@@ -52,7 +52,7 @@ async function main() {
   // Wait for estimate attempt to finish (success or Overpass/network error).
   await page.waitForFunction(() => {
     const status = document.getElementById('status')?.textContent || '';
-    return /Counted|No buildings|failed|keep it under|remark/i.test(status);
+    return /Counted|No buildings|Overpass failed|try again|failed|keep it under|remark|rate limit/i.test(status);
   }, null, { timeout: 60000 });
 
   const status = await page.locator('#status').textContent();
@@ -84,7 +84,7 @@ async function main() {
     process.exit(1);
   }
   // Overpass public servers can 504; draw/clear without stack overflow is the gate.
-  if (!/Counted|No buildings|failed|keep it under/i.test(status || '')) {
+  if (!/Counted|No buildings|Overpass failed|try again|failed|keep it under|rate limit/i.test(status || '')) {
     console.error('FAIL unexpected status:', status);
     process.exit(1);
   }

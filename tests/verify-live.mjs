@@ -32,7 +32,7 @@ for (const [px, py] of [
 
 await page.waitForFunction(() => {
   const status = document.getElementById('status')?.textContent || '';
-  return /Counted|No buildings|failed|keep it under/i.test(status);
+  return /Counted|No buildings|Overpass failed|try again|failed|keep it under|rate limit/i.test(status);
 }, null, { timeout: 60000 });
 
 const status = await page.locator('#status').textContent();

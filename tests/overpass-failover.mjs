@@ -120,7 +120,64 @@ globalThis.fetch = originalFetch;
 
 assert(failed, 'should throw when still rate limited');
 assert(/429|rate limit/i.test(failed.message), failed.message);
+assert(failed.code === 'OVERPASS_FAILED', 'should use OVERPASS_FAILED code');
 console.log('PASS overpass 429 exhausted message');
+
+// Exhausted 504s must NOT look like “no buildings”
+clearOverpassCache();
+calls = 0;
+now = 3_000_000;
+globalThis.fetch = async () => ({
+  ok: false,
+  status: 504,
+  headers: { get: () => null },
+  json: async () => ({ error: 'Gateway Timeout' }),
+});
+
+let failed504 = null;
+try {
+  await fetchBuildingsInPolygon(geometry, {
+    endpoints,
+    now: () => now,
+  });
+} catch (error) {
+  failed504 = error;
+}
+
+// Invalid success payload (no elements array) is also a failure, not empty.
+clearOverpassCache();
+calls = 0;
+now = 4_000_000;
+globalThis.fetch = async () => ({
+  ok: true,
+  status: 200,
+  headers: { get: () => null },
+  json: async () => ({}),
+});
+
+let failedInvalid = null;
+try {
+  await fetchBuildingsInPolygon(geometry, {
+    endpoints: [endpoints[0]],
+    now: () => now,
+  });
+} catch (error) {
+  failedInvalid = error;
+}
+
+globalThis.fetch = originalFetch;
+
+assert(failed504, 'should throw on 504');
+assert(failed504.code === 'OVERPASS_FAILED', '504 code');
+assert(/Overpass failed to run/i.test(failed504.message), failed504.message);
+assert(/try again/i.test(failed504.message), failed504.message);
+assert(!/no buildings/i.test(failed504.message), '504 must not say no buildings');
+
+assert(failedInvalid, 'should throw on invalid JSON payload');
+assert(failedInvalid.code === 'OVERPASS_FAILED', 'invalid payload code');
+assert(!/no buildings/i.test(failedInvalid.message), 'invalid must not say no buildings');
+
+console.log('PASS overpass 504 + invalid payload messaging');
 
 function assert(condition, message) {
   if (!condition) {

@@ -28,7 +28,7 @@ import {
   isToolZoomOk,
   setToolEnabled,
 } from './map.js';
-import { fetchBuildingsInPolygon } from './overpass.js';
+import { fetchBuildingsInPolygon, OVERPASS_FAILED } from './overpass.js';
 import { estimatePopulation } from './population.js';
 import { createPopulationHeatmap } from './heatmap.js';
 import {
@@ -36,6 +36,7 @@ import {
   loadPresets,
   renderStats,
   setStatus,
+  hideRetry,
 } from './panel.js';
 import { initPlaceSearch } from './search.js';
 
@@ -79,27 +80,39 @@ async function main() {
   const drawButton = document.getElementById('draw-polygon');
   const finishButton = document.getElementById('finish-polygon');
   const clearButton = document.getElementById('clear-polygon');
+  const retryButton = document.getElementById('retry-overpass');
+
+  /** Last polygon feature used for estimate / retry. */
+  let latestFeature = null;
 
   const drawer = attachPolygonDrawer(map, {
     onComplete: (feature) => {
+      latestFeature = feature;
+      hideRetry();
       syncDrawChrome();
       runEstimate(feature);
     },
     onEdit: (feature) => {
+      latestFeature = feature;
+      hideRetry();
       syncDrawChrome();
       scheduleEditEstimate(feature);
     },
     onClear: () => {
+      latestFeature = null;
       clearTimeout(editEstimateTimer);
       editEstimateTimer = null;
+      hideRetry();
       syncDrawChrome();
       clearEstimate();
     },
     onCancel: () => {
+      hideRetry();
       syncDrawChrome();
       setStatus('Drawing cancelled. Tap Draw area to start again.');
     },
     onVertexCount: (count) => {
+      hideRetry();
       syncDrawChrome();
       if (count === 0) {
         setStatus('Tap the map to place the first corner.');
@@ -127,6 +140,7 @@ async function main() {
       return;
     }
     if (!drawer.startDrawing()) return;
+    hideRetry();
     setStatus('Tap the map to place corners. Tap the first corner to finish.');
     syncDrawChrome();
   });
@@ -137,6 +151,17 @@ async function main() {
 
   clearButton?.addEventListener('click', () => {
     drawer.clear();
+  });
+
+  retryButton?.addEventListener('click', () => {
+    const feature = latestFeature || drawer.getPolygon();
+    if (!feature) {
+      hideRetry();
+      setStatus('No area to retry. Tap Draw area to start.');
+      return;
+    }
+    hideRetry();
+    runEstimate(feature);
   });
 
   function syncDrawChrome() {
@@ -178,6 +203,7 @@ async function main() {
 
   function scheduleEditEstimate(feature) {
     clearTimeout(editEstimateTimer);
+    hideRetry();
     setStatus('Boundary updated — requerying buildings…', 'loading');
     editEstimateTimer = setTimeout(() => {
       editEstimateTimer = null;
@@ -194,6 +220,8 @@ async function main() {
     }
     estimateInFlight = true;
     pendingEstimateFeature = null;
+    latestFeature = feature;
+    hideRetry();
 
     try {
       if (!isToolZoomOk(map)) {
@@ -255,7 +283,21 @@ async function main() {
         }
 
         console.error(error);
-        setStatus(error.message || 'Building query failed.', 'error');
+        const isOverpassFailure =
+          error.code === OVERPASS_FAILED ||
+          error.name === 'OverpassError' ||
+          /overpass|504|502|503|429|rate limit|timeout|busy|network error/i.test(
+            error.message || ''
+          );
+
+        setStatus(
+          isOverpassFailure
+            ? error.message ||
+                'Overpass failed to run. Do you want to try again?'
+            : error.message || 'Building query failed.',
+          'error',
+          { showRetry: isOverpassFailure && !!latestFeature }
+        );
       }
     } finally {
       estimateInFlight = false;
@@ -272,6 +314,7 @@ async function main() {
     pendingEstimateFeature = null;
     clearTimeout(editEstimateTimer);
     editEstimateTimer = null;
+    hideRetry();
 
     latestCounts = null;
     latestBuildings = [];

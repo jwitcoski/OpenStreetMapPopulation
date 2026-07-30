@@ -102,12 +102,23 @@ function numberValue(elementId) {
  * Show a short status message under the stats.
  * @param {string} message
  * @param {'' | 'error' | 'loading'} [kind]
+ * @param {{ showRetry?: boolean }} [options]
  */
-export function setStatus(message, kind = '') {
+export function setStatus(message, kind = '', options = {}) {
   const statusElement = document.getElementById('status');
+  const retryButton = document.getElementById('retry-overpass');
   statusElement.textContent = message ?? '';
   statusElement.classList.remove('is-error', 'is-loading');
   if (kind) statusElement.classList.add(`is-${kind}`);
+  if (retryButton) {
+    retryButton.hidden = !options.showRetry;
+  }
+}
+
+/** Hide the Overpass retry control. */
+export function hideRetry() {
+  const retryButton = document.getElementById('retry-overpass');
+  if (retryButton) retryButton.hidden = true;
 }
 
 /**

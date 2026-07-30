@@ -103,9 +103,17 @@
 
 /* ----- Status line ----- */
 
-.panel__status {
-  min-height: 1.25rem;
+.panel__status-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
   margin: 0 0 0.85rem;
+}
+
+.panel__status {
+  flex: 1;
+  min-height: 1.25rem;
+  margin: 0;
   font-size: 0.85rem;
   color: var(--muted);
 }
@@ -116,6 +124,24 @@
 
 .panel__status.is-loading {
   color: var(--accent);
+}
+
+.panel__retry {
+  flex-shrink: 0;
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 0.35rem 0.55rem;
+  background: var(--accent);
+  color: #f7f4ee;
+  font: inherit;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel__retry:hover,
+.panel__retry:focus {
+  outline: 2px solid rgba(15, 107, 92, 0.3);
 }
 
 /* ----- Form fields ----- */
