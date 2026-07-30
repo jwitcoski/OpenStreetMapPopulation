@@ -225,7 +225,7 @@ export function hideRetry() {
  *   } | null
  * }} stats
  */
-export function renderStats({ population, counts, areaKm2, compare = null }) {
+export function renderStats({ population, counts, areaKm2, compare }) {
   setText('stat-population', formatNumber(population));
   setText('stat-buildings', formatNumber(counts?.total));
   setText('stat-houses', formatNumber(counts?.houses));
@@ -237,7 +237,9 @@ export function renderStats({ population, counts, areaKm2, compare = null }) {
     areaKm2 == null ? '—' : `${areaKm2.toFixed(2)} km²`
   );
 
-  renderCompareStats(compare);
+  if (compare !== undefined) {
+    renderCompareStats(compare);
+  }
 }
 
 /**
