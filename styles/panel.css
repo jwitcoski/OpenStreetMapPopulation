@@ -96,6 +96,14 @@
   margin-top: 0.5rem;
 }
 
+.stat-grid--compare {
+  margin-top: 0.5rem;
+}
+
+.stat-grid--compare[hidden] {
+  display: none;
+}
+
 .stat--small {
   background: rgba(255, 255, 255, 0.55);
   border: 1px solid var(--panel-border);

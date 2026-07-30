@@ -4,6 +4,11 @@
  * No map or Overpass logic lives here.
  */
 
+import {
+  COMPARE_DATASETS,
+  getCompareDataset,
+} from './compare-population.js';
+
 /**
  * Load country / custom demographic presets from public/demographics.json.
  * Supports either a bare preset array or `{ source, presets }`.
@@ -32,15 +37,34 @@ export async function loadPresets() {
 /**
  * Wire up the preset dropdown and form inputs.
  * Calls onParamsChange whenever the user edits a value.
+ * Calls onCompareChange when the reference dataset changes.
  */
-export function initPanel({ source, presets, defaultPresetId }, { onParamsChange }) {
+export function initPanel(
+  { source, presets, defaultPresetId },
+  { onParamsChange, onCompareChange }
+) {
   const presetSelect = document.getElementById('preset');
   const presetFilter = document.getElementById('preset-filter');
+  const compareSelect = document.getElementById('compare-dataset');
   const form = document.getElementById('params-form');
   const sourceNote = document.getElementById('demographics-source');
 
   if (!presets.length) {
     throw new Error('No demographic presets found');
+  }
+
+  if (compareSelect && !compareSelect.options.length) {
+    compareSelect.innerHTML = COMPARE_DATASETS.map(
+      (dataset) => `<option value="${dataset.id}">${dataset.label}</option>`
+    ).join('');
+  }
+  if (compareSelect) {
+    compareSelect.value = 'worldpop';
+    updateCompareChrome(compareSelect.value);
+    compareSelect.addEventListener('change', () => {
+      updateCompareChrome(compareSelect.value);
+      onCompareChange?.(compareSelect.value);
+    });
   }
 
   function renderPresetOptions(filterText = '') {
@@ -87,11 +111,46 @@ export function initPanel({ source, presets, defaultPresetId }, { onParamsChange
   });
 
   form.addEventListener('input', (event) => {
-    if (event.target === presetFilter) return;
+    if (event.target === presetFilter || event.target === compareSelect) return;
     onParamsChange(readParams());
   });
 
-  return { readParams };
+  return { readParams, readCompareDataset };
+}
+
+/** @returns {import('./compare-population.js').CompareDatasetId} */
+export function readCompareDataset() {
+  const select = document.getElementById('compare-dataset');
+  const value = select?.value || 'worldpop';
+  if (value === 'ghs-pop' || value === 'none' || value === 'worldpop') {
+    return value;
+  }
+  return 'worldpop';
+}
+
+function updateCompareChrome(datasetId) {
+  const dataset = getCompareDataset(datasetId);
+  const hint = document.getElementById('compare-hint');
+  const source = document.getElementById('compare-source');
+  const compareStats = document.getElementById('compare-stats');
+
+  if (hint) {
+    hint.textContent =
+      datasetId === 'none'
+        ? 'Skip gridded population comparison.'
+        : `Reference population from ${dataset.label}.`;
+  }
+
+  if (source) {
+    source.innerHTML =
+      datasetId === 'none' || !dataset.creditHtml
+        ? ''
+        : ` Comparison via ${dataset.creditHtml}.`;
+  }
+
+  if (compareStats) {
+    compareStats.hidden = datasetId === 'none';
+  }
 }
 
 /** Copy a preset's numbers into the form fields. */
@@ -152,8 +211,21 @@ export function hideRetry() {
 
 /**
  * Update all statistic readouts in the panel.
+ * @param {{
+ *   population: number | null,
+ *   counts: object | null,
+ *   areaKm2: number | null,
+ *   compare?: {
+ *     population?: number | null,
+ *     ratio?: number | null,
+ *     label?: string,
+ *     loading?: boolean,
+ *     error?: string | null,
+ *     hidden?: boolean
+ *   } | null
+ * }} stats
  */
-export function renderStats({ population, counts, areaKm2 }) {
+export function renderStats({ population, counts, areaKm2, compare = null }) {
   setText('stat-population', formatNumber(population));
   setText('stat-buildings', formatNumber(counts?.total));
   setText('stat-houses', formatNumber(counts?.houses));
@@ -164,6 +236,54 @@ export function renderStats({ population, counts, areaKm2 }) {
     'stat-area',
     areaKm2 == null ? '—' : `${areaKm2.toFixed(2)} km²`
   );
+
+  renderCompareStats(compare);
+}
+
+/**
+ * @param {{
+ *   population?: number | null,
+ *   ratio?: number | null,
+ *   label?: string,
+ *   loading?: boolean,
+ *   error?: string | null,
+ *   hidden?: boolean
+ * } | null} compare
+ */
+export function renderCompareStats(compare) {
+  const compareStats = document.getElementById('compare-stats');
+  if (!compareStats) return;
+
+  if (compare?.hidden) {
+    compareStats.hidden = true;
+    return;
+  }
+  compareStats.hidden = false;
+
+  const label = document.getElementById('stat-compare-label');
+  if (label) {
+    label.textContent = compare?.label || 'Reference';
+  }
+
+  if (compare?.loading) {
+    setText('stat-compare-population', '…');
+    setText('stat-compare-ratio', '…');
+    return;
+  }
+
+  if (compare?.error) {
+    setText('stat-compare-population', '—');
+    setText('stat-compare-ratio', '—');
+    return;
+  }
+
+  setText('stat-compare-population', formatNumber(compare?.population));
+  setText('stat-compare-ratio', formatRatio(compare?.ratio));
+}
+
+function formatRatio(value) {
+  if (value == null || Number.isNaN(value)) return '—';
+  return `${value.toFixed(2)}×`;
 }
 
 function setText(elementId, value) {

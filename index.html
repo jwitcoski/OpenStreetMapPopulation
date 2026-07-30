@@ -88,6 +88,17 @@
             <span class="stat__value" id="stat-area">—</span>
           </div>
         </div>
+
+        <div class="stat-grid stat-grid--compare" id="compare-stats">
+          <div class="stat stat--small">
+            <span class="stat__label" id="stat-compare-label">Reference</span>
+            <span class="stat__value" id="stat-compare-population">—</span>
+          </div>
+          <div class="stat stat--small">
+            <span class="stat__label">OSM / reference</span>
+            <span class="stat__value" id="stat-compare-ratio">—</span>
+          </div>
+        </div>
       </section>
 
       <!-- Short status line (loading, errors, tips) -->
@@ -121,6 +132,16 @@
 
       <!-- User-tunable estimate inputs -->
       <form class="panel__form" id="params-form">
+        <label class="field">
+          <span>Compare with</span>
+          <select id="compare-dataset" name="compareDataset">
+            <option value="worldpop">WorldPop (2020, ~100 m)</option>
+            <option value="ghs-pop">GHS-POP (2025, ~100 m)</option>
+            <option value="none">Off</option>
+          </select>
+          <small id="compare-hint" class="field__hint"></small>
+        </label>
+
         <label class="field">
           <span>Demographics preset</span>
           <input
@@ -211,6 +232,7 @@
         >
         via Overpass. Queries limited to city-sized areas.
         <span id="demographics-source"></span>
+        <span id="compare-source"></span>
       </footer>
     </aside>
 

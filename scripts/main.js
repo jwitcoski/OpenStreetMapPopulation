@@ -30,10 +30,17 @@ import {
 } from './map.js';
 import { fetchBuildingsInPolygon, OVERPASS_FAILED } from './overpass.js';
 import { estimatePopulation } from './population.js';
+import {
+  compareRatio,
+  fetchComparePopulation,
+  getCompareDataset,
+} from './compare-population.js';
 import { createPopulationHeatmap } from './heatmap.js';
 import {
   initPanel,
   loadPresets,
+  readCompareDataset,
+  renderCompareStats,
   renderStats,
   setStatus,
   hideRetry,
@@ -49,8 +56,17 @@ let latestBuildings = [];
 /** Last measured polygon area in km². */
 let latestAreaKm2 = null;
 
+/** Last OSM population estimate (for comparison ratio). */
+let latestPopulation = null;
+
+/** Last successful reference comparison result. */
+let latestCompare = null;
+
 /** AbortController for the in-flight Overpass request. */
 let activeController = null;
+
+/** AbortController for the in-flight reference population request. */
+let compareController = null;
 
 /** Prevent overlapping estimate runs. */
 let estimateInFlight = false;
@@ -72,6 +88,16 @@ async function main() {
     { source, presets, defaultPresetId },
     {
       onParamsChange: recomputeFromParams,
+      onCompareChange: () => {
+        if (latestFeature?.geometry && latestPopulation != null) {
+          runCompare(latestFeature.geometry, latestPopulation);
+        } else {
+          latestCompare = null;
+          renderCompareStats({
+            hidden: readCompareDataset() === 'none',
+          });
+        }
+      },
     }
   );
 
@@ -258,8 +284,18 @@ async function main() {
 
         const params = readParams();
         const population = estimatePopulation(counts, params);
+        latestPopulation = population;
         heatmap.setBuildings(buildings, params);
-        renderStats({ population, counts, areaKm2 });
+        renderStats({
+          population,
+          counts,
+          areaKm2,
+          compare: {
+            loading: readCompareDataset() !== 'none',
+            hidden: readCompareDataset() === 'none',
+            label: shortCompareLabel(readCompareDataset()),
+          },
+        });
 
         setStatus(
           counts.total
@@ -267,16 +303,21 @@ async function main() {
             : 'No buildings found in this polygon. Drag corners to adjust, or Clear.'
         );
         syncDrawChrome();
+        runCompare(feature.geometry, population);
       } catch (error) {
         if (error.name === 'AbortError') return;
 
         latestCounts = null;
         latestBuildings = [];
+        latestPopulation = null;
+        latestCompare = null;
+        abortCompare();
         heatmap.clear();
         renderStats({
           population: null,
           counts: null,
           areaKm2: latestAreaKm2,
+          compare: { hidden: readCompareDataset() === 'none' },
         });
 
         if (error.code === 'AREA_TOO_LARGE') {
@@ -320,6 +361,7 @@ async function main() {
 
   function clearEstimate() {
     if (activeController) activeController.abort();
+    abortCompare();
     pendingEstimateFeature = null;
     clearTimeout(editEstimateTimer);
     editEstimateTimer = null;
@@ -328,8 +370,15 @@ async function main() {
     latestCounts = null;
     latestBuildings = [];
     latestAreaKm2 = null;
+    latestPopulation = null;
+    latestCompare = null;
     heatmap.clear();
-    renderStats({ population: null, counts: null, areaKm2: null });
+    renderStats({
+      population: null,
+      counts: null,
+      areaKm2: null,
+      compare: { hidden: readCompareDataset() === 'none' },
+    });
 
     if (!isToolZoomOk(map)) {
       setStatus(TOOL_DISABLED_NOTE);
@@ -343,13 +392,98 @@ async function main() {
     if (!latestCounts) return;
 
     const population = estimatePopulation(latestCounts, params);
+    latestPopulation = population;
     heatmap.updateWeights(params);
     renderStats({
       population,
       counts: latestCounts,
       areaKm2: latestAreaKm2,
+      compare: compareStatsPayload(population),
     });
   }
+
+  function abortCompare() {
+    if (compareController) {
+      compareController.abort();
+      compareController = null;
+    }
+  }
+
+  /**
+   * Fetch WorldPop / GHS-POP for the polygon without blocking the OSM result.
+   * @param {GeoJSON.Polygon} geometry
+   * @param {number} population
+   */
+  async function runCompare(geometry, population) {
+    abortCompare();
+    const datasetId = readCompareDataset();
+
+    if (datasetId === 'none' || !geometry) {
+      latestCompare = null;
+      renderCompareStats({ hidden: true });
+      return;
+    }
+
+    compareController = new AbortController();
+    const signal = compareController.signal;
+    const label = shortCompareLabel(datasetId);
+
+    renderCompareStats({ loading: true, label });
+
+    try {
+      const result = await fetchComparePopulation(geometry, datasetId, {
+        signal,
+      });
+      if (signal.aborted) return;
+
+      latestCompare = result;
+      renderCompareStats({
+        population: result?.population ?? null,
+        ratio: compareRatio(population, result?.population),
+        label: shortCompareLabel(datasetId, result?.dataset),
+      });
+    } catch (error) {
+      if (error.name === 'AbortError' || signal.aborted) return;
+      console.error(error);
+      latestCompare = null;
+      renderCompareStats({
+        error: error.message || 'Comparison failed',
+        label,
+      });
+    } finally {
+      if (compareController?.signal === signal) {
+        compareController = null;
+      }
+    }
+  }
+
+  function compareStatsPayload(population) {
+    const datasetId = readCompareDataset();
+    if (datasetId === 'none') return { hidden: true };
+    if (!latestCompare) {
+      return {
+        loading: false,
+        population: null,
+        ratio: null,
+        label: shortCompareLabel(datasetId),
+      };
+    }
+    return {
+      population: latestCompare.population,
+      ratio: compareRatio(population, latestCompare.population),
+      label: shortCompareLabel(datasetId, latestCompare.dataset),
+    };
+  }
+}
+
+/**
+ * @param {import('./compare-population.js').CompareDatasetId} datasetId
+ * @param {{ label?: string } | null} [dataset]
+ */
+function shortCompareLabel(datasetId, dataset = null) {
+  if (datasetId === 'worldpop') return dataset?.year === 2025 ? 'WorldPop 2025' : 'WorldPop';
+  if (datasetId === 'ghs-pop') return 'GHS-POP';
+  return getCompareDataset(datasetId).label;
 }
 
 main().catch((error) => {
