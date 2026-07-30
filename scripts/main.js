@@ -88,12 +88,14 @@ async function main() {
     syncToolGate();
   });
 
+  // zoomend only — per-frame zoom events were needlessly toggling draw mode.
   map.on('zoomend', syncToolGate);
-  map.on('zoom', syncToolGate);
 
   map.on('draw.create', runEstimate);
   map.on('draw.update', runEstimate);
   map.on('draw.delete', clearEstimate);
+
+  let estimateInFlight = false;
 
   /**
    * When the user draws or edits a polygon:
@@ -103,59 +105,66 @@ async function main() {
    * 4. Update the side panel
    */
   async function runEstimate() {
-    if (!isToolZoomOk(map)) {
-      draw.deleteAll();
-      syncToolGate();
-      return;
-    }
-
-    const feature = getDrawnPolygon(draw);
-
-    if (!feature) {
-      clearEstimate();
-      return;
-    }
-
-    // Cancel any previous query still running.
-    if (activeController) activeController.abort();
-    activeController = new AbortController();
+    if (estimateInFlight) return;
+    estimateInFlight = true;
 
     try {
-      const areaKm2 = assertCityScaleArea(feature.geometry);
-      latestAreaKm2 = areaKm2;
-      setStatus('Querying OpenStreetMap buildings…', 'loading');
-
-      const counts = await fetchBuildingsInPolygon(feature.geometry, {
-        signal: activeController.signal,
-      });
-      latestCounts = counts;
-
-      const population = estimatePopulation(counts, readParams());
-      renderStats({ population, counts, areaKm2 });
-
-      setStatus(
-        counts.total
-          ? `Counted ${counts.total} buildings in ${areaKm2.toFixed(2)} km².`
-          : 'No buildings found in this polygon.'
-      );
-    } catch (error) {
-      if (error.name === 'AbortError') return;
-
-      latestCounts = null;
-      renderStats({
-        population: null,
-        counts: null,
-        areaKm2: latestAreaKm2,
-      });
-
-      if (error.code === 'AREA_TOO_LARGE') {
+      if (!isToolZoomOk(map)) {
         draw.deleteAll();
-        setStatus(error.message, 'error');
+        syncToolGate();
         return;
       }
 
-      console.error(error);
-      setStatus(error.message || 'Building query failed.', 'error');
+      const feature = getDrawnPolygon(draw);
+
+      if (!feature) {
+        clearEstimate();
+        return;
+      }
+
+      // Cancel any previous query still running.
+      if (activeController) activeController.abort();
+      activeController = new AbortController();
+
+      try {
+        const areaKm2 = assertCityScaleArea(feature.geometry);
+        latestAreaKm2 = areaKm2;
+        setStatus('Querying OpenStreetMap buildings…', 'loading');
+
+        const counts = await fetchBuildingsInPolygon(feature.geometry, {
+          signal: activeController.signal,
+        });
+        latestCounts = counts;
+
+        const population = estimatePopulation(counts, readParams());
+        renderStats({ population, counts, areaKm2 });
+
+        setStatus(
+          counts.total
+            ? `Counted ${counts.total} buildings in ${areaKm2.toFixed(2)} km².`
+            : 'No buildings found in this polygon.'
+        );
+      } catch (error) {
+        if (error.name === 'AbortError') return;
+
+        latestCounts = null;
+        renderStats({
+          population: null,
+          counts: null,
+          areaKm2: latestAreaKm2,
+        });
+
+        if (error.code === 'AREA_TOO_LARGE') {
+          draw.deleteAll();
+          setStatus(error.message, 'error');
+          return;
+        }
+
+        console.error(error);
+        setStatus(error.message || 'Building query failed.', 'error');
+      }
+    } finally {
+      estimateInFlight = false;
     }
   }
 

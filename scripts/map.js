@@ -103,12 +103,8 @@ export function createMap(containerId) {
     drawGroup.classList.add('buildingpop-draw');
   }
 
-  // Select a newly drawn polygon so trash / edit work immediately.
-  map.on('draw.create', (event) => {
-    const created = event.features?.[0];
-    if (!created?.id) return;
-    draw.changeMode('simple_select', { featureIds: [created.id] });
-  });
+  // Do NOT call changeMode() from draw.create — Draw already transitions to
+  // simple_select while firing create; doing it again recurses until the stack blows.
 
   wireReliableTrashButton(draw);
 
@@ -158,11 +154,15 @@ export function setDrawToolEnabled(draw, enabled) {
     drawRoot.classList.toggle('is-disabled', !enabled);
   }
 
+  const wasDisabled = document.body.classList.contains('is-tool-disabled');
   document.body.classList.toggle('is-tool-disabled', !enabled);
 
-  if (!enabled) {
+  // Only cancel an in-progress draw when crossing into the disabled state.
+  if (!enabled && !wasDisabled) {
     try {
-      draw.changeMode('simple_select');
+      if (draw.getMode && draw.getMode() !== 'simple_select') {
+        draw.changeMode('simple_select');
+      }
     } catch {
       // Ignore mode errors during early map init.
     }
