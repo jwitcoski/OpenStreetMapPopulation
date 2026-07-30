@@ -1,0 +1,29 @@
+[
+  {
+    "id": "united-states",
+    "name": "United States",
+    "pctResidential": 80,
+    "householdSize": 2.5,
+    "occupancy": 90,
+    "apartmentPop": 40,
+    "pctMapped": 95
+  },
+  {
+    "id": "germany",
+    "name": "Germany",
+    "pctResidential": 75,
+    "householdSize": 2.0,
+    "occupancy": 92,
+    "apartmentPop": 35,
+    "pctMapped": 98
+  },
+  {
+    "id": "custom",
+    "name": "Custom",
+    "pctResidential": 80,
+    "householdSize": 2.5,
+    "occupancy": 90,
+    "apartmentPop": 40,
+    "pctMapped": 100
+  }
+]
