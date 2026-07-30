@@ -66,8 +66,8 @@ const TOOL_DISABLED_NOTE =
   `Zoom in to city level (z${TOOL_MIN_ZOOM}+) to draw. Overpass can only handle city-sized areas — not regions or countries.`;
 
 async function main() {
-  const presets = await loadPresets();
-  const { readParams } = initPanel(presets, {
+  const { source, presets } = await loadPresets();
+  const { readParams } = initPanel({ source, presets }, {
     onParamsChange: recomputeFromParams,
   });
 

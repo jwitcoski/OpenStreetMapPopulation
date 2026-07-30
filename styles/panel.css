@@ -149,6 +149,12 @@
   border-color: var(--accent);
 }
 
+.field__hint {
+  min-height: 0.9rem;
+  font-size: 0.68rem;
+  color: var(--muted);
+}
+
 .panel__formula {
   margin: 0.9rem 0 0.75rem;
   font-size: 0.72rem;
@@ -160,6 +166,10 @@
   margin: 0;
   font-size: 0.72rem;
   color: var(--muted);
+}
+
+.panel__footer a {
+  color: var(--accent);
 }
 
 .panel__footer a {

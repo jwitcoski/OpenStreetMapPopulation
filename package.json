@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test:draw": "node tests/draw-smoke.mjs",
     "test:mobile": "node tests/mobile-draw-overpass.mjs",
-    "test:unit": "node tests/heatmap-unit.mjs && node tests/overpass-failover.mjs",
+    "test:unit": "node tests/heatmap-unit.mjs && node tests/overpass-failover.mjs && node tests/demographics-presets.mjs",
     "test": "npm run test:unit && npm run test:draw && npm run build && npm run test:mobile"
   },
   "dependencies": {

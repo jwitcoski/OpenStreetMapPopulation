@@ -1,29 +1,89 @@
-[
-  {
-    "id": "united-states",
-    "name": "United States",
-    "pctResidential": 80,
-    "householdSize": 2.5,
-    "occupancy": 90,
-    "apartmentPop": 40,
-    "pctMapped": 95
+{
+  "source": {
+    "label": "UN DESA Household Size and Composition 2022",
+    "url": "https://www.un.org/development/desa/pd/data/household-size-and-composition",
+    "countriesNote": "Country presets match the nations covered by the OSM building-level population paper’s multi-country check (Germany plus Marseille/France, Brussels/Belgium, Bern/Switzerland, Copenhagen/Denmark, Cambridge/UK, Seattle/US). Average household size is from UN DESA; occupancy, apartment-building size, residential share, and mapped completeness are estimation defaults for this tool."
   },
-  {
-    "id": "germany",
-    "name": "Germany",
-    "pctResidential": 75,
-    "householdSize": 2.0,
-    "occupancy": 92,
-    "apartmentPop": 35,
-    "pctMapped": 98
-  },
-  {
-    "id": "custom",
-    "name": "Custom",
-    "pctResidential": 80,
-    "householdSize": 2.5,
-    "occupancy": 90,
-    "apartmentPop": 40,
-    "pctMapped": 100
-  }
-]
+  "presets": [
+    {
+      "id": "united-states",
+      "name": "United States",
+      "householdSize": 2.49,
+      "householdSizeYear": 2020,
+      "pctResidential": 80,
+      "occupancy": 90,
+      "apartmentPop": 40,
+      "pctMapped": 95
+    },
+    {
+      "id": "germany",
+      "name": "Germany",
+      "householdSize": 2.14,
+      "householdSizeYear": 2011,
+      "pctResidential": 75,
+      "occupancy": 96,
+      "apartmentPop": 35,
+      "pctMapped": 98
+    },
+    {
+      "id": "france",
+      "name": "France",
+      "householdSize": 2.22,
+      "householdSizeYear": 2015,
+      "pctResidential": 75,
+      "occupancy": 94,
+      "apartmentPop": 35,
+      "pctMapped": 96
+    },
+    {
+      "id": "belgium",
+      "name": "Belgium",
+      "householdSize": 2.32,
+      "householdSizeYear": 2011,
+      "pctResidential": 75,
+      "occupancy": 94,
+      "apartmentPop": 35,
+      "pctMapped": 96
+    },
+    {
+      "id": "switzerland",
+      "name": "Switzerland",
+      "householdSize": 2.24,
+      "householdSizeYear": 2000,
+      "pctResidential": 75,
+      "occupancy": 95,
+      "apartmentPop": 32,
+      "pctMapped": 98
+    },
+    {
+      "id": "denmark",
+      "name": "Denmark",
+      "householdSize": 1.83,
+      "householdSizeYear": 2021,
+      "householdSizeNote": "UN DESA / Genus 2024 compilation (Denmark absent from 2022 spreadsheet export; 1.83 persons/household for 2021).",
+      "pctResidential": 75,
+      "occupancy": 95,
+      "apartmentPop": 30,
+      "pctMapped": 97
+    },
+    {
+      "id": "united-kingdom",
+      "name": "United Kingdom",
+      "householdSize": 2.35,
+      "householdSizeYear": 2011,
+      "pctResidential": 80,
+      "occupancy": 93,
+      "apartmentPop": 35,
+      "pctMapped": 96
+    },
+    {
+      "id": "custom",
+      "name": "Custom",
+      "householdSize": 2.5,
+      "pctResidential": 80,
+      "occupancy": 90,
+      "apartmentPop": 40,
+      "pctMapped": 100
+    }
+  ]
+}

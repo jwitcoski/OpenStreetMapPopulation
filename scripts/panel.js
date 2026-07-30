@@ -6,6 +6,7 @@
 
 /**
  * Load country / custom demographic presets from public/demographics.json.
+ * Supports either a bare preset array or `{ source, presets }`.
  */
 export async function loadPresets() {
   const response = await fetch(
@@ -16,20 +17,37 @@ export async function loadPresets() {
     throw new Error('Could not load demographics presets');
   }
 
-  return response.json();
+  const data = await response.json();
+  if (Array.isArray(data)) {
+    return { source: null, presets: data };
+  }
+
+  return {
+    source: data.source ?? null,
+    presets: data.presets ?? [],
+  };
 }
 
 /**
  * Wire up the preset dropdown and form inputs.
  * Calls onParamsChange whenever the user edits a value.
  */
-export function initPanel(presets, { onParamsChange }) {
+export function initPanel({ source, presets }, { onParamsChange }) {
   const presetSelect = document.getElementById('preset');
   const form = document.getElementById('params-form');
+  const sourceNote = document.getElementById('demographics-source');
+
+  if (!presets.length) {
+    throw new Error('No demographic presets found');
+  }
 
   presetSelect.innerHTML = presets
     .map((preset) => `<option value="${preset.id}">${preset.name}</option>`)
     .join('');
+
+  if (sourceNote && source?.url) {
+    sourceNote.innerHTML = `Household size from <a href="${source.url}" target="_blank" rel="noopener">${source.label || 'UN DESA'}</a>. Other factors are estimation defaults.`;
+  }
 
   applyPreset(presets[0]);
 
@@ -54,6 +72,15 @@ function applyPreset(preset) {
   document.getElementById('occupancy').value = preset.occupancy;
   document.getElementById('apartment-pop').value = preset.apartmentPop;
   document.getElementById('pct-mapped').value = preset.pctMapped;
+
+  const hint = document.getElementById('household-size-hint');
+  if (hint) {
+    if (preset.id === 'custom' || !preset.householdSizeYear) {
+      hint.textContent = '';
+    } else {
+      hint.textContent = `UN average household size (${preset.householdSizeYear}).`;
+    }
+  }
 }
 
 /** Read the current estimate parameters from the form. */
