@@ -30,6 +30,7 @@ import {
 } from './map.js';
 import { fetchBuildingsInPolygon } from './overpass.js';
 import { estimatePopulation } from './population.js';
+import { createPopulationHeatmap } from './heatmap.js';
 import {
   initPanel,
   loadPresets,
@@ -40,6 +41,9 @@ import { initPlaceSearch } from './search.js';
 
 /** Last successful building counts (used when form inputs change). */
 let latestCounts = null;
+
+/** Last building records for heatmap re-weighting. */
+let latestBuildings = [];
 
 /** Last measured polygon area in km². */
 let latestAreaKm2 = null;
@@ -61,6 +65,7 @@ async function main() {
 
   const { map } = createMap('map');
   initPlaceSearch(map);
+  const heatmap = createPopulationHeatmap(map);
 
   const toolBanner = document.getElementById('tool-banner');
   const drawButton = document.getElementById('draw-polygon');
@@ -93,7 +98,7 @@ async function main() {
   });
 
   // Test / debug hook used by Playwright smoke tests.
-  window.__buildingPop = { map, drawer, ready: false };
+  window.__buildingPop = { map, drawer, heatmap, ready: false };
   map.on('load', () => {
     window.__buildingPop.ready = true;
     syncToolGate();
@@ -156,12 +161,16 @@ async function main() {
         latestAreaKm2 = areaKm2;
         setStatus('Querying OpenStreetMap buildings…', 'loading');
 
-        const counts = await fetchBuildingsInPolygon(feature.geometry, {
-          signal: activeController.signal,
-        });
+        const { counts, buildings } = await fetchBuildingsInPolygon(
+          feature.geometry,
+          { signal: activeController.signal }
+        );
         latestCounts = counts;
+        latestBuildings = buildings;
 
-        const population = estimatePopulation(counts, readParams());
+        const params = readParams();
+        const population = estimatePopulation(counts, params);
+        heatmap.setBuildings(buildings, params);
         renderStats({ population, counts, areaKm2 });
 
         setStatus(
@@ -173,6 +182,8 @@ async function main() {
         if (error.name === 'AbortError') return;
 
         latestCounts = null;
+        latestBuildings = [];
+        heatmap.clear();
         renderStats({
           population: null,
           counts: null,
@@ -197,7 +208,9 @@ async function main() {
     if (activeController) activeController.abort();
 
     latestCounts = null;
+    latestBuildings = [];
     latestAreaKm2 = null;
+    heatmap.clear();
     renderStats({ population: null, counts: null, areaKm2: null });
 
     if (!isToolZoomOk(map)) {
@@ -211,6 +224,7 @@ async function main() {
     if (!latestCounts) return;
 
     const population = estimatePopulation(latestCounts, params);
+    heatmap.updateWeights(params);
     renderStats({
       population,
       counts: latestCounts,

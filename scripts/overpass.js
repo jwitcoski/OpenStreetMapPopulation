@@ -30,9 +30,11 @@ out tags center;
 }
 
 /**
- * Fetch OSM buildings inside a GeoJSON polygon and return classified counts.
+ * Fetch OSM buildings inside a GeoJSON polygon.
+ * Returns classified counts plus per-building centers for the heatmap.
  * @param {object} geometry - GeoJSON Polygon geometry
  * @param {{ signal?: AbortSignal }} [options]
+ * @returns {Promise<{ counts: object, buildings: object[] }>}
  */
 export async function fetchBuildingsInPolygon(geometry, { signal } = {}) {
   const polyString = polygonToOverpassPoly(geometry);

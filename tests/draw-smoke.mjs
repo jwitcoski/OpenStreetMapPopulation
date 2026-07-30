@@ -76,13 +76,18 @@ async function main() {
         point: map.project(points[0]),
       });
 
-      await new Promise((r) => setTimeout(r, 800));
+      await new Promise((r) => setTimeout(r, 1500));
+
+      const heatSource = window.__buildingPop.map.getSource('population-heat');
+      const heatData = heatSource?._data;
+      const heatCount = heatData?.features?.length ?? 0;
 
       return {
         hasPolygon: !!drawer.getPolygon(),
         isDrawing: drawer.isDrawing(),
         status: document.getElementById('status')?.textContent ?? '',
         population: document.getElementById('stat-population')?.textContent ?? '',
+        heatCount,
         errors,
       };
     } finally {
@@ -144,6 +149,15 @@ async function main() {
 
   if (!cleared) {
     console.error('FAIL: clear button did not remove polygon');
+    process.exit(1);
+  }
+
+  // Heat features appear after Overpass returns; allow zero if Overpass failed.
+  if (
+    /Counted/i.test(apiResult.status) &&
+    !(apiResult.heatCount > 0)
+  ) {
+    console.error('FAIL: expected heatmap points after a successful count');
     process.exit(1);
   }
 

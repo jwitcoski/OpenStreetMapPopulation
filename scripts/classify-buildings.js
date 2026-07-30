@@ -1,6 +1,6 @@
 /*
  * classify-buildings.js
- * Turns raw Overpass building elements into simple type counts.
+ * Turns raw Overpass building elements into counts + per-building records.
  *
  * Categories:
  *   houses      — single-family / house-like tags
@@ -16,18 +16,26 @@ import {
 } from './config.js';
 
 /**
+ * @typedef {'houses' | 'apartments' | 'commercial' | 'other'} BuildingCategory
+ *
  * @typedef {object} BuildingCounts
  * @property {number} total
  * @property {number} houses
  * @property {number} apartments
  * @property {number} commercial
  * @property {number} other
+ *
+ * @typedef {object} BuildingRecord
+ * @property {BuildingCategory} category
+ * @property {string} buildingType
+ * @property {number} longitude
+ * @property {number} latitude
  */
 
 /**
- * Classify an array of Overpass elements by their building=* tag.
- * @param {Array<{ tags?: Record<string, string> }>} elements
- * @returns {BuildingCounts}
+ * Classify Overpass elements and keep centers for the heatmap.
+ * @param {Array<object>} elements
+ * @returns {{ counts: BuildingCounts, buildings: BuildingRecord[] }}
  */
 export function classifyBuildings(elements) {
   const counts = {
@@ -37,24 +45,40 @@ export function classifyBuildings(elements) {
     commercial: 0,
     other: 0,
   };
+  const buildings = [];
 
   for (const element of elements) {
     const buildingType = String(element.tags?.building ?? '').toLowerCase();
     if (!buildingType) continue;
 
-    counts.total += 1;
-
+    /** @type {BuildingCategory} */
+    let category;
     if (HOUSE_TYPES.has(buildingType)) {
+      category = 'houses';
       counts.houses += 1;
     } else if (APARTMENT_TYPES.has(buildingType)) {
+      category = 'apartments';
       counts.apartments += 1;
     } else if (COMMERCIAL_TYPES.has(buildingType)) {
+      category = 'commercial';
       counts.commercial += 1;
     } else {
-      // Ambiguous tags (often building=yes) — residential % applied later.
+      category = 'other';
       counts.other += 1;
     }
+
+    counts.total += 1;
+
+    const center = element.center;
+    if (center?.lon == null || center?.lat == null) continue;
+
+    buildings.push({
+      category,
+      buildingType,
+      longitude: center.lon,
+      latitude: center.lat,
+    });
   }
 
-  return counts;
+  return { counts, buildings };
 }

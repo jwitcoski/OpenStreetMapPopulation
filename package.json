@@ -9,7 +9,8 @@
     "preview": "vite preview",
     "test:draw": "node tests/draw-smoke.mjs",
     "test:mobile": "node tests/mobile-draw-overpass.mjs",
-    "test": "npm run test:draw && npm run build && npm run test:mobile"
+    "test:unit": "node tests/heatmap-unit.mjs",
+    "test": "npm run test:unit && npm run test:draw && npm run build && npm run test:mobile"
   },
   "dependencies": {
     "@turf/area": "^7.2.0",

@@ -57,12 +57,20 @@ async function main() {
 
   const status = await page.locator('#status').textContent();
   const population = await page.locator('#stat-population').textContent();
+  const heatCount = await page.evaluate(() => {
+    const source = window.__buildingPop?.map?.getSource('population-heat');
+    return source?._data?.features?.length ?? 0;
+  });
 
   await page.locator('#clear-polygon').tap();
   await page.waitForTimeout(200);
   const cleared = await page.evaluate(() => !window.__buildingPop.drawer.getPolygon());
+  const heatCleared = await page.evaluate(() => {
+    const source = window.__buildingPop?.map?.getSource('population-heat');
+    return (source?._data?.features?.length ?? 0) === 0;
+  });
 
-  console.log(JSON.stringify({ status, population, cleared, pageErrors }, null, 2));
+  console.log(JSON.stringify({ status, population, heatCount, cleared, heatCleared, pageErrors }, null, 2));
 
   const stack = pageErrors.filter((t) => /stack size|RangeError/i.test(t));
   await browser.close();
@@ -73,7 +81,7 @@ async function main() {
     console.error(stack.join('\n'));
     process.exit(1);
   }
-  if (!cleared) {
+  if (!cleared || !heatCleared) {
     console.error('FAIL clear');
     process.exit(1);
   }
@@ -82,7 +90,11 @@ async function main() {
     console.error('FAIL unexpected status:', status);
     process.exit(1);
   }
-  console.log('PASS mobile draw + clear (no stack overflow)');
+  if (/Counted/i.test(status || '') && !(heatCount > 0)) {
+    console.error('FAIL expected heatmap points after count');
+    process.exit(1);
+  }
+  console.log('PASS mobile draw + heatmap + clear (no stack overflow)');
 }
 
 main().catch((e) => {

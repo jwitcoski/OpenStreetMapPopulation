@@ -41,3 +41,41 @@
 body.is-tool-disabled [data-requires-tool] {
   opacity: 0.45;
 }
+
+.heat-legend {
+  margin: 0 0 0.85rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.heat-legend__label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.heat-legend__bar {
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    #d7ebe6 0%,
+    #7ebfb2 25%,
+    #0f6b5c 50%,
+    #f0a202 75%,
+    #9b2c2c 100%
+  );
+}
+
+.heat-legend__ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.25rem;
+  font-size: 0.72rem;
+  color: var(--muted);
+}
