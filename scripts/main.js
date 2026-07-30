@@ -54,6 +54,14 @@ let activeController = null;
 /** Prevent overlapping estimate runs. */
 let estimateInFlight = false;
 
+/** Feature waiting to run after the current estimate finishes. */
+let pendingEstimateFeature = null;
+
+/** Debounce timer for reshaping a finished polygon. */
+let editEstimateTimer = null;
+
+const EDIT_REQUERY_MS = 700;
+
 const TOOL_DISABLED_NOTE =
   `Zoom in to city level (z${TOOL_MIN_ZOOM}+) to draw. Overpass can only handle city-sized areas — not regions or countries.`;
 
@@ -74,19 +82,25 @@ async function main() {
 
   const drawer = attachPolygonDrawer(map, {
     onComplete: (feature) => {
-      finishButton.disabled = true;
+      syncDrawChrome();
       runEstimate(feature);
     },
+    onEdit: (feature) => {
+      syncDrawChrome();
+      scheduleEditEstimate(feature);
+    },
     onClear: () => {
-      finishButton.disabled = true;
+      clearTimeout(editEstimateTimer);
+      editEstimateTimer = null;
+      syncDrawChrome();
       clearEstimate();
     },
     onCancel: () => {
-      finishButton.disabled = true;
+      syncDrawChrome();
       setStatus('Drawing cancelled. Tap Draw area to start again.');
     },
     onVertexCount: (count) => {
-      finishButton.disabled = count < 3 || !isToolZoomOk(map);
+      syncDrawChrome();
       if (count === 0) {
         setStatus('Tap the map to place the first corner.');
       } else if (count < 3) {
@@ -94,6 +108,9 @@ async function main() {
       } else {
         setStatus('Tap the first (orange) corner or Finish to close the area.');
       }
+    },
+    onStateChange: () => {
+      syncDrawChrome();
     },
   });
 
@@ -105,12 +122,13 @@ async function main() {
   });
 
   drawButton?.addEventListener('click', () => {
-    if (!isToolZoomOk(map)) {
-      syncToolGate();
+    if (!isToolZoomOk(map) || drawer.getPolygon()) {
+      syncDrawChrome();
       return;
     }
-    drawer.startDrawing();
+    if (!drawer.startDrawing()) return;
     setStatus('Tap the map to place corners. Tap the first corner to finish.');
+    syncDrawChrome();
   });
 
   finishButton?.addEventListener('click', () => {
@@ -121,9 +139,26 @@ async function main() {
     drawer.clear();
   });
 
+  function syncDrawChrome() {
+    const zoomOk = isToolZoomOk(map);
+    const hasPolygon = !!drawer.getPolygon();
+    const drawing = drawer.isDrawing();
+    const vertexCount = drawer.getVertexCount?.() ?? 0;
+
+    setToolEnabled(zoomOk);
+
+    // Draw area is one-shot until Clear — greys out once a shape exists.
+    if (drawButton) {
+      drawButton.disabled = !zoomOk || hasPolygon || drawing;
+    }
+
+    if (finishButton) {
+      finishButton.disabled = !zoomOk || !drawing || vertexCount < 3;
+    }
+  }
+
   function syncToolGate() {
     const enabled = isToolZoomOk(map);
-    setToolEnabled(enabled);
 
     if (toolBanner) toolBanner.hidden = enabled;
 
@@ -132,14 +167,33 @@ async function main() {
       setStatus(TOOL_DISABLED_NOTE);
     } else if (!drawer.getPolygon() && !latestCounts && !drawer.isDrawing()) {
       setStatus('Search for a city, then tap Draw area.');
+    } else if (drawer.getPolygon() && latestCounts) {
+      setStatus(
+        `Counted ${latestCounts.total} buildings. Drag corners to adjust, or Clear to start over.`
+      );
     }
+
+    syncDrawChrome();
+  }
+
+  function scheduleEditEstimate(feature) {
+    clearTimeout(editEstimateTimer);
+    setStatus('Boundary updated — requerying buildings…', 'loading');
+    editEstimateTimer = setTimeout(() => {
+      editEstimateTimer = null;
+      runEstimate(feature);
+    }, EDIT_REQUERY_MS);
   }
 
   map.on('zoomend', syncToolGate);
 
   async function runEstimate(feature) {
-    if (estimateInFlight) return;
+    if (estimateInFlight) {
+      pendingEstimateFeature = feature;
+      return;
+    }
     estimateInFlight = true;
+    pendingEstimateFeature = null;
 
     try {
       if (!isToolZoomOk(map)) {
@@ -178,9 +232,10 @@ async function main() {
 
         setStatus(
           counts.total
-            ? `Counted ${counts.total} buildings in ${areaKm2.toFixed(2)} km².`
-            : 'No buildings found in this polygon.'
+            ? `Counted ${counts.total} buildings in ${areaKm2.toFixed(2)} km². Drag corners to adjust.`
+            : 'No buildings found in this polygon. Drag corners to adjust, or Clear.'
         );
+        syncDrawChrome();
       } catch (error) {
         if (error.name === 'AbortError') return;
 
@@ -204,11 +259,19 @@ async function main() {
       }
     } finally {
       estimateInFlight = false;
+      if (pendingEstimateFeature) {
+        const next = pendingEstimateFeature;
+        pendingEstimateFeature = null;
+        runEstimate(next);
+      }
     }
   }
 
   function clearEstimate() {
     if (activeController) activeController.abort();
+    pendingEstimateFeature = null;
+    clearTimeout(editEstimateTimer);
+    editEstimateTimer = null;
 
     latestCounts = null;
     latestBuildings = [];
@@ -221,6 +284,7 @@ async function main() {
     } else {
       setStatus('Area cleared. Tap Draw area to estimate again.');
     }
+    syncDrawChrome();
   }
 
   function recomputeFromParams(params) {

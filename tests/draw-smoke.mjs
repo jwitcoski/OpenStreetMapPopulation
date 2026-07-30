@@ -113,10 +113,40 @@ async function main() {
   const uiStatus = await page.locator('#status').textContent();
   const uiPopulation = await page.locator('#stat-population').textContent();
 
+  // Draw area must grey out once a finished polygon exists.
+  const drawDisabledAfterShape = await page.locator('#draw-polygon').isDisabled();
+  const startBlocked = await page.evaluate(() => {
+    const { drawer } = window.__buildingPop;
+    const before = drawer.getPolygon()?.geometry?.coordinates?.[0]?.[0];
+    const started = drawer.startDrawing();
+    const after = drawer.getPolygon()?.geometry?.coordinates?.[0]?.[0];
+    return { started, sameCorner: JSON.stringify(before) === JSON.stringify(after) };
+  });
+
+  // Dragging a corner updates the ring (via moveVertex API).
+  const edited = await page.evaluate(() => {
+    const { drawer } = window.__buildingPop;
+    const ringBefore = drawer.getPolygon()?.geometry?.coordinates?.[0];
+    const ok = drawer.moveVertex(1, [-77.034, 38.894]);
+    const ringAfter = drawer.getPolygon()?.geometry?.coordinates?.[0];
+    return {
+      ok,
+      changed:
+        ringBefore &&
+        ringAfter &&
+        (ringBefore[1][0] !== ringAfter[1][0] || ringBefore[1][1] !== ringAfter[1][1]),
+      vertexCount: drawer.getVertexCount(),
+    };
+  });
+
   // Clear button
   await page.click('#clear-polygon');
   await page.waitForTimeout(200);
   const cleared = await page.evaluate(() => !window.__buildingPop.drawer.getPolygon());
+  const drawEnabledAfterClear = await page.evaluate(() => {
+    const btn = document.getElementById('draw-polygon');
+    return btn && !btn.disabled;
+  });
 
   await browser.close();
   await server.close();
@@ -128,7 +158,18 @@ async function main() {
 
   console.log(
     JSON.stringify(
-      { apiResult, uiStatus, uiPopulation, cleared, pageErrors, consoleErrors },
+      {
+        apiResult,
+        uiStatus,
+        uiPopulation,
+        drawDisabledAfterShape,
+        startBlocked,
+        edited,
+        cleared,
+        drawEnabledAfterClear,
+        pageErrors,
+        consoleErrors,
+      },
       null,
       2
     )
@@ -145,8 +186,18 @@ async function main() {
     process.exit(1);
   }
 
-  if (!cleared) {
-    console.error('FAIL: clear button did not remove polygon');
+  if (!drawDisabledAfterShape || startBlocked.started !== false || !startBlocked.sameCorner) {
+    console.error('FAIL: Draw area should stay disabled / not clear finished polygon');
+    process.exit(1);
+  }
+
+  if (!edited.ok || !edited.changed) {
+    console.error('FAIL: vertex edit did not update polygon');
+    process.exit(1);
+  }
+
+  if (!cleared || !drawEnabledAfterClear) {
+    console.error('FAIL: clear button did not remove polygon / re-enable Draw');
     process.exit(1);
   }
 
@@ -159,7 +210,7 @@ async function main() {
     process.exit(1);
   }
 
-  console.log('PASS: draw/clear worked without stack overflow');
+  console.log('PASS: draw/edit/clear worked without stack overflow');
 }
 
 main().catch((error) => {
