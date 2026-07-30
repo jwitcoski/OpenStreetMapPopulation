@@ -17,7 +17,7 @@
       App styles are loaded from scripts/main.js so Vite can bundle them.
       See styles/ for the human-readable CSS source files.
     -->
-    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-DKoopPSX.js"></script>
+    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-BtnDEmZG.js"></script>
     <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-BY8fEL8s.css">
   </head>
   <body>
@@ -196,16 +196,20 @@
         </label>
 
         <label class="field">
-          <span>People per apartment building</span>
+          <span>Floor area per household (m²)</span>
           <input
-            id="apartment-pop"
-            name="apartmentPop"
+            id="sqm-per-household"
+            name="sqmPerHousehold"
             type="number"
-            min="0"
-            max="5000"
+            min="10"
+            max="500"
             step="1"
-            value="40"
+            value="70"
           />
+          <small class="field__hint"
+            >Used with footprint × levels to estimate apartment units (or
+            building:flats when tagged).</small
+          >
         </label>
 
         <label class="field">
@@ -223,8 +227,10 @@
       </form>
 
       <p class="panel__formula">
-        Estimate = (apartments × people/apt + (houses + other × residential%) × occupancy × household
-        size) × mapped%
+        Estimate = (apartment units × occupancy × household size + (houses + other ×
+        residential%) × occupancy × household size) × mapped%. Apartment units prefer
+        building:flats; else (footprint m² × levels) ÷ m²/household; else levels
+        (default 1).
       </p>
 
       <footer class="panel__footer">

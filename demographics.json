@@ -3,7 +3,7 @@
     "label": "UN DESA Household Size and Composition 2022",
     "url": "https://www.un.org/development/desa/pd/data/household-size-and-composition",
     "dataset": "https://www.un.org/development/desa/pd/sites/www.un.org.development.desa.pd/files/undesa_pd_2022_hh-size-composition.xlsx",
-    "countriesNote": "Average household size for each country/area is the latest available estimate from the UN DESA Database on Household Size and Composition 2022 Excel table. Occupancy, apartment-building size, residential share, and mapped completeness are estimation defaults for this tool (not from UN DESA)."
+    "countriesNote": "Average household size for each country/area is the latest available estimate from the UN DESA Database on Household Size and Composition 2022 Excel table. Occupancy, floor area per household, residential share, and mapped completeness are estimation defaults for this tool (not from UN DESA)."
   },
   "defaultPresetId": "united-states",
   "presets": [
@@ -17,8 +17,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 108,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "albania",
@@ -30,8 +30,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 46,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "algeria",
@@ -43,8 +43,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 69,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "angola",
@@ -56,8 +56,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 67,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "argentina",
@@ -69,8 +69,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 41,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "armenia",
@@ -82,8 +82,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 50,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "aruba",
@@ -95,8 +95,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "australia",
@@ -108,8 +108,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "austria",
@@ -121,8 +121,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "azerbaijan",
@@ -134,8 +134,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bahamas",
@@ -147,8 +147,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bangladesh",
@@ -160,8 +160,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 60,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "barbados",
@@ -173,8 +173,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "belarus",
@@ -186,8 +186,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 30,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "belgium",
@@ -199,8 +199,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "belize",
@@ -212,8 +212,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 52,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "benin",
@@ -225,8 +225,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 73,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bermuda",
@@ -238,8 +238,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bhutan",
@@ -251,8 +251,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bolivia",
@@ -264,8 +264,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 49,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bosnia-and-herzegovina",
@@ -277,8 +277,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 49,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "botswana",
@@ -290,8 +290,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 49,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "brazil",
@@ -303,8 +303,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 46,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "bulgaria",
@@ -316,8 +316,8 @@
       "dataSource": "LFS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "burkina-faso",
@@ -329,8 +329,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 83,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "burundi",
@@ -342,8 +342,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 60,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "cambodia",
@@ -355,8 +355,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 65,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "cameroon",
@@ -368,8 +368,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "canada",
@@ -381,8 +381,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 34,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "central-african-republic",
@@ -394,8 +394,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 78,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "chad",
@@ -407,8 +407,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 84,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "chile",
@@ -420,8 +420,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 43,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "china",
@@ -433,8 +433,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 47,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "china-hong-kong-sar",
@@ -446,8 +446,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "china-macao-sar",
@@ -459,8 +459,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 43,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "colombia",
@@ -472,8 +472,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 53,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "comoros",
@@ -485,8 +485,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 104,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "congo",
@@ -498,8 +498,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 59,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "costa-rica",
@@ -511,8 +511,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 45,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "croatia",
@@ -524,8 +524,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 39,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "cuba",
@@ -537,8 +537,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 38,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "cyprus",
@@ -550,8 +550,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 39,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "czechia",
@@ -563,21 +563,21 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "c-te-d-ivoire",
-      "name": "C\u00f4te d\u2019Ivoire",
+      "name": "Côte d’Ivoire",
       "householdSize": 4.58,
       "householdSizeYear": 2016,
-      "unName": "C\u00f4te d\u2019Ivoire",
+      "unName": "Côte d’Ivoire",
       "isoNumeric": "384",
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "dem-people-s-rep-of-korea",
@@ -589,8 +589,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 55,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "dem-republic-of-the-congo",
@@ -602,8 +602,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 72,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "djibouti",
@@ -615,8 +615,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 82,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "dominican-republic",
@@ -628,8 +628,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 43,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "ecuador",
@@ -641,8 +641,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 53,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "egypt",
@@ -654,8 +654,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 65,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "el-salvador",
@@ -667,8 +667,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 55,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "equatorial-guinea",
@@ -680,8 +680,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 74,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "estonia",
@@ -693,8 +693,8 @@
       "dataSource": "LFS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "eswatini",
@@ -706,8 +706,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 57,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "ethiopia",
@@ -719,8 +719,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 66,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "fiji",
@@ -732,8 +732,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "finland",
@@ -745,8 +745,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 29,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "france",
@@ -758,8 +758,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 31,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "french-guiana",
@@ -771,8 +771,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "gabon",
@@ -784,21 +784,21 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 57,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "gambia",
       "name": "Gambia",
-      "householdSize": 8.0,
+      "householdSize": 8,
       "householdSizeYear": 2018,
       "unName": "Gambia",
       "isoNumeric": "270",
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 112,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "georgia",
@@ -810,8 +810,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "germany",
@@ -823,8 +823,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 30,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "ghana",
@@ -836,8 +836,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 66,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "greece",
@@ -849,8 +849,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "guadeloupe",
@@ -862,8 +862,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "guatemala",
@@ -875,8 +875,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 71,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "guinea",
@@ -888,8 +888,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 89,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "guinea-bissau",
@@ -901,8 +901,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 95,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "guyana",
@@ -914,8 +914,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 49,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "haiti",
@@ -927,8 +927,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 62,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "honduras",
@@ -940,8 +940,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 54,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "hungary",
@@ -953,8 +953,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "india",
@@ -966,8 +966,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 62,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "indonesia",
@@ -979,8 +979,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 54,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "iran",
@@ -992,8 +992,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 49,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "iraq",
@@ -1005,8 +1005,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 89,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "ireland",
@@ -1018,8 +1018,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "isle-of-man",
@@ -1031,8 +1031,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "israel",
@@ -1044,8 +1044,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 44,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "italy",
@@ -1057,8 +1057,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 34,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "jamaica",
@@ -1070,8 +1070,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 43,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "japan",
@@ -1083,8 +1083,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "jordan",
@@ -1096,8 +1096,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 66,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "kazakhstan",
@@ -1109,8 +1109,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "kenya",
@@ -1122,8 +1122,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 52,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "kiribati",
@@ -1135,8 +1135,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 83,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "kosovo-under-unsc-res-1244",
@@ -1148,8 +1148,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 69,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "kyrgyzstan",
@@ -1161,8 +1161,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 57,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "lao-people-s-dem-republic",
@@ -1174,8 +1174,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 66,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "latvia",
@@ -1187,8 +1187,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "lesotho",
@@ -1200,8 +1200,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 52,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "liberia",
@@ -1213,8 +1213,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "liechtenstein",
@@ -1226,8 +1226,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "lithuania",
@@ -1239,8 +1239,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "luxembourg",
@@ -1252,8 +1252,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 34,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "madagascar",
@@ -1265,8 +1265,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 63,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "malawi",
@@ -1278,8 +1278,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 60,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "malaysia",
@@ -1291,8 +1291,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "maldives",
@@ -1304,8 +1304,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 75,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mali",
@@ -1317,8 +1317,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 86,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "malta",
@@ -1330,8 +1330,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 37,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "martinique",
@@ -1343,8 +1343,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mauritania",
@@ -1356,8 +1356,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 81,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mauritius",
@@ -1369,8 +1369,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 49,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mayotte",
@@ -1382,8 +1382,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 57,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mexico",
@@ -1395,8 +1395,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 52,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "moldova",
@@ -1408,8 +1408,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "monaco",
@@ -1421,8 +1421,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 30,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mongolia",
@@ -1434,8 +1434,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 51,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "montenegro",
@@ -1447,8 +1447,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 46,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "morocco",
@@ -1460,8 +1460,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "mozambique",
@@ -1473,8 +1473,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 64,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "myanmar",
@@ -1486,8 +1486,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 62,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "namibia",
@@ -1499,8 +1499,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 71,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "nepal",
@@ -1512,8 +1512,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 60,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "netherlands",
@@ -1525,8 +1525,8 @@
       "dataSource": "LFS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 31,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "new-zealand",
@@ -1538,8 +1538,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "nicaragua",
@@ -1551,8 +1551,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 69,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "niger",
@@ -1564,8 +1564,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 85,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "nigeria",
@@ -1577,8 +1577,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 75,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "norway",
@@ -1590,8 +1590,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 31,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "oman",
@@ -1603,8 +1603,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 112,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "pakistan",
@@ -1616,8 +1616,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 95,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "palestine",
@@ -1629,8 +1629,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 71,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "panama",
@@ -1642,8 +1642,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 51,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "papua-new-guinea",
@@ -1655,8 +1655,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 76,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "paraguay",
@@ -1668,8 +1668,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 54,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "peru",
@@ -1681,8 +1681,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "philippines",
@@ -1694,8 +1694,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 61,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "poland",
@@ -1707,8 +1707,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 39,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "portugal",
@@ -1720,8 +1720,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "puerto-rico",
@@ -1733,8 +1733,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 37,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "qatar",
@@ -1746,8 +1746,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 65,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "romania",
@@ -1759,8 +1759,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 37,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "russia",
@@ -1772,8 +1772,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "rwanda",
@@ -1785,34 +1785,34 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 60,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "r-union",
-      "name": "R\u00e9union",
+      "name": "Réunion",
       "householdSize": 2.64,
       "householdSizeYear": 2015,
-      "unName": "R\u00e9union",
+      "unName": "Réunion",
       "isoNumeric": "638",
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 37,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "saint-barth-l-my",
-      "name": "Saint Barth\u00e9l\u00e9my",
+      "name": "Saint Barthélémy",
       "householdSize": 2.42,
       "householdSizeYear": 2015,
-      "unName": "Saint Barth\u00e9l\u00e9my",
+      "unName": "Saint Barthélémy",
       "isoNumeric": "652",
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 34,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "saint-lucia",
@@ -1824,8 +1824,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "saint-pierre-and-miquelon",
@@ -1837,8 +1837,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 32,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "saint-martin-french-part",
@@ -1850,8 +1850,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "samoa",
@@ -1863,8 +1863,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 92,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "sao-tome-and-principe",
@@ -1876,8 +1876,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 57,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "senegal",
@@ -1889,8 +1889,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 121,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "serbia",
@@ -1902,8 +1902,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "seychelles",
@@ -1915,8 +1915,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 53,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "sierra-leone",
@@ -1928,8 +1928,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 74,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "singapore",
@@ -1941,8 +1941,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 41,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "sint-maarten-dutch-part",
@@ -1954,8 +1954,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "slovakia",
@@ -1967,8 +1967,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 41,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "slovenia",
@@ -1980,8 +1980,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 35,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "somalia",
@@ -1993,8 +1993,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 86,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "south-africa",
@@ -2006,8 +2006,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 45,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "south-korea",
@@ -2019,8 +2019,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "south-sudan",
@@ -2032,8 +2032,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 84,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "spain",
@@ -2045,8 +2045,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 36,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "sudan",
@@ -2058,8 +2058,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 82,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "suriname",
@@ -2071,8 +2071,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 54,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "switzerland",
@@ -2084,8 +2084,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 31,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "syria",
@@ -2097,8 +2097,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 79,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tajikistan",
@@ -2110,8 +2110,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 87,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tanzania",
@@ -2123,8 +2123,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 66,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tfyr-macedonia",
@@ -2136,8 +2136,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "thailand",
@@ -2149,8 +2149,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "timor-leste",
@@ -2162,8 +2162,8 @@
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 74,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "togo",
@@ -2175,8 +2175,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 61,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tokelau",
@@ -2188,8 +2188,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 73,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tonga",
@@ -2201,8 +2201,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 74,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "trinidad-and-tobago",
@@ -2214,8 +2214,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 46,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tunisia",
@@ -2227,8 +2227,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 54,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "turkmenistan",
@@ -2240,8 +2240,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 73,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "turks-and-caicos-islands",
@@ -2253,8 +2253,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "tuvalu",
@@ -2266,21 +2266,21 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 85,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "t-rkiye",
-      "name": "T\u00fcrkiye",
+      "name": "Türkiye",
       "householdSize": 4.33,
       "householdSizeYear": 2000,
-      "unName": "T\u00fcrkiye",
+      "unName": "Türkiye",
       "isoNumeric": "792",
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 61,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "uganda",
@@ -2292,8 +2292,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 66,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "ukraine",
@@ -2305,8 +2305,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 35,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "united-kingdom",
@@ -2318,8 +2318,8 @@
       "dataSource": "DYB",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 33,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "united-states",
@@ -2331,8 +2331,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 35,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "uruguay",
@@ -2344,8 +2344,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 42,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "uzbekistan",
@@ -2357,8 +2357,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 73,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "vanuatu",
@@ -2370,8 +2370,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 71,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "venezuela",
@@ -2383,8 +2383,8 @@
       "dataSource": "IPUMS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 61,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "vietnam",
@@ -2396,8 +2396,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 48,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "yemen",
@@ -2409,21 +2409,21 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 102,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "zambia",
       "name": "Zambia",
-      "householdSize": 5.0,
+      "householdSize": 5,
       "householdSizeYear": 2018,
       "unName": "Zambia",
       "isoNumeric": "894",
       "dataSource": "DHS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 70,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "zimbabwe",
@@ -2435,8 +2435,8 @@
       "dataSource": "MICS",
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 56,
-      "pctMapped": 90
+      "pctMapped": 90,
+      "sqmPerHousehold": 70
     },
     {
       "id": "custom",
@@ -2444,8 +2444,8 @@
       "householdSize": 2.5,
       "pctResidential": 80,
       "occupancy": 90,
-      "apartmentPop": 40,
-      "pctMapped": 100
+      "pctMapped": 100,
+      "sqmPerHousehold": 70
     }
   ]
 }
