@@ -17,12 +17,33 @@
       App styles are loaded from scripts/main.js so Vite can bundle them.
       See styles/ for the human-readable CSS source files.
     -->
-    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-DZ5x0jJR.js"></script>
-    <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-CraA28Rs.css">
+    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-BCXsMdvp.js"></script>
+    <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-B67lJIAU.css">
   </head>
   <body>
     <!-- Full-screen map canvas (MapLibre mounts here) -->
     <div id="map" role="application" aria-label="City map for drawing an area"></div>
+
+    <!-- City / area search (Photon geocoder) -->
+    <form id="place-search-form" class="place-search" role="search">
+      <label class="place-search__label" for="place-search-input">Find a city or area</label>
+      <input
+        id="place-search-input"
+        class="place-search__input"
+        type="search"
+        name="place"
+        placeholder="Search city or area…"
+        autocomplete="off"
+        enterkeyhint="search"
+      />
+      <ul id="place-search-results" class="place-search__results" hidden></ul>
+    </form>
+
+    <!-- Shown when zoomed out too far for Overpass queries -->
+    <div id="tool-banner" class="tool-banner" hidden role="status">
+      Drawing is paused while zoomed out. Zoom in to city level to use the tool —
+      Overpass can only handle city-sized areas, not regions or countries.
+    </div>
 
     <!-- Side panel: results + estimate settings -->
     <aside id="panel" class="panel" aria-label="Population estimate controls">
@@ -31,7 +52,8 @@
         <p class="panel__brand">BuildingPop</p>
         <h1 class="panel__title">Population estimate</h1>
         <p class="panel__lede">
-          Draw a city-scale polygon to count OSM buildings and estimate residents.
+          Search for a city, zoom in, then draw a polygon to count OSM buildings and
+          estimate residents.
         </p>
       </header>
 
@@ -72,6 +94,10 @@
 
       <!-- Short status line (loading, errors, tips) -->
       <p class="panel__status" id="status" role="status"></p>
+
+      <button type="button" id="clear-polygon" class="panel__clear">
+        Clear drawn area
+      </button>
 
       <!-- User-tunable estimate inputs -->
       <form class="panel__form" id="params-form">
@@ -156,7 +182,7 @@
         <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener"
           >OpenStreetMap</a
         >
-        via Overpass. City-level zoom only.
+        via Overpass. Queries limited to city-sized areas.
       </footer>
     </aside>
 
