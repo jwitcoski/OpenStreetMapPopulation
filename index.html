@@ -17,8 +17,8 @@
       App styles are loaded from scripts/main.js so Vite can bundle them.
       See styles/ for the human-readable CSS source files.
     -->
-    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-BF_ccKgM.js"></script>
-    <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-CV0sCjHW.css">
+    <script type="module" crossorigin src="/OpenStreetMapPopulation/assets/index-BAHki-qH.js"></script>
+    <link rel="stylesheet" crossorigin href="/OpenStreetMapPopulation/assets/index-2kWeZqmM.css">
   </head>
   <body>
     <!-- Full-screen map canvas (MapLibre mounts here) -->
@@ -93,7 +93,12 @@
       </section>
 
       <!-- Short status line (loading, errors, tips) -->
-      <p class="panel__status" id="status" role="status"></p>
+      <div class="panel__status-row">
+        <p class="panel__status" id="status" role="status"></p>
+        <button type="button" id="retry-overpass" class="panel__retry" hidden>
+          Try again
+        </button>
+      </div>
 
       <div class="panel__actions">
         <button type="button" id="draw-polygon" class="panel__action" data-requires-tool>
