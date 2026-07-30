@@ -25,6 +25,7 @@ export async function loadPresets() {
   return {
     source: data.source ?? null,
     presets: data.presets ?? [],
+    defaultPresetId: data.defaultPresetId ?? null,
   };
 }
 
@@ -32,8 +33,9 @@ export async function loadPresets() {
  * Wire up the preset dropdown and form inputs.
  * Calls onParamsChange whenever the user edits a value.
  */
-export function initPanel({ source, presets }, { onParamsChange }) {
+export function initPanel({ source, presets, defaultPresetId }, { onParamsChange }) {
   const presetSelect = document.getElementById('preset');
+  const presetFilter = document.getElementById('preset-filter');
   const form = document.getElementById('params-form');
   const sourceNote = document.getElementById('demographics-source');
 
@@ -41,15 +43,41 @@ export function initPanel({ source, presets }, { onParamsChange }) {
     throw new Error('No demographic presets found');
   }
 
-  presetSelect.innerHTML = presets
-    .map((preset) => `<option value="${preset.id}">${preset.name}</option>`)
-    .join('');
+  function renderPresetOptions(filterText = '') {
+    const needle = filterText.trim().toLowerCase();
+    const visible = needle
+      ? presets.filter((preset) => preset.name.toLowerCase().includes(needle))
+      : presets;
 
-  if (sourceNote && source?.url) {
-    sourceNote.innerHTML = `Household size from <a href="${source.url}" target="_blank" rel="noopener">${source.label || 'UN DESA'}</a>. Other factors are estimation defaults.`;
+    const selectedId = presetSelect.value;
+    presetSelect.innerHTML = visible
+      .map((preset) => `<option value="${preset.id}">${preset.name}</option>`)
+      .join('');
+
+    if (visible.some((preset) => preset.id === selectedId)) {
+      presetSelect.value = selectedId;
+    } else if (visible[0]) {
+      presetSelect.value = visible[0].id;
+    }
   }
 
-  applyPreset(presets[0]);
+  if (sourceNote && source?.url) {
+    const count = presets.filter((preset) => preset.id !== 'custom').length;
+    sourceNote.innerHTML = `Household size for ${count} countries from <a href="${source.url}" target="_blank" rel="noopener">${source.label || 'UN DESA'}</a>. Other factors are estimation defaults.`;
+  }
+
+  const preferred =
+    presets.find((preset) => preset.id === defaultPresetId) ||
+    presets.find((preset) => preset.id === 'united-states') ||
+    presets[0];
+
+  renderPresetOptions('');
+  presetSelect.value = preferred.id;
+  applyPreset(preferred);
+
+  presetFilter?.addEventListener('input', () => {
+    renderPresetOptions(presetFilter.value);
+  });
 
   presetSelect.addEventListener('change', () => {
     const selected = presets.find((preset) => preset.id === presetSelect.value);
@@ -58,7 +86,8 @@ export function initPanel({ source, presets }, { onParamsChange }) {
     onParamsChange(readParams());
   });
 
-  form.addEventListener('input', () => {
+  form.addEventListener('input', (event) => {
+    if (event.target === presetFilter) return;
     onParamsChange(readParams());
   });
 

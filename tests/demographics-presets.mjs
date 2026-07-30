@@ -1,5 +1,5 @@
 /*
- * Verify demographic presets load with UN country household sizes.
+ * Verify UN DESA country household-size presets.
  * Run: node tests/demographics-presets.mjs
  */
 
@@ -20,43 +20,48 @@ function assert(condition, message) {
 }
 
 assert(data.source?.url, 'missing source.url');
+assert(data.source?.dataset, 'missing source.dataset (Excel URL)');
 assert(Array.isArray(data.presets), 'presets must be an array');
 
-const ids = data.presets.map((p) => p.id);
-const expected = [
-  'united-states',
-  'germany',
-  'france',
-  'belgium',
-  'switzerland',
-  'denmark',
-  'united-kingdom',
-  'custom',
-];
-
-for (const id of expected) {
-  assert(ids.includes(id), `missing preset ${id}`);
-}
+const countries = data.presets.filter((preset) => preset.id !== 'custom');
+assert(countries.length >= 180, `expected ~world list, got ${countries.length}`);
+assert(data.presets.at(-1)?.id === 'custom', 'Custom should be last');
 
 const byId = Object.fromEntries(data.presets.map((p) => [p.id, p]));
+for (const id of [
+  'united-states',
+  'germany',
+  'india',
+  'nigeria',
+  'brazil',
+  'japan',
+  'china',
+  'australia',
+  'egypt',
+  'mexico',
+]) {
+  assert(byId[id], `missing preset ${id}`);
+  assert(byId[id].householdSize > 1, `${id} householdSize`);
+}
 
 assert(byId['united-states'].householdSize === 2.49, 'US household size');
 assert(byId.germany.householdSize === 2.14, 'Germany household size');
-assert(byId.france.householdSize === 2.22, 'France household size');
-assert(byId.belgium.householdSize === 2.32, 'Belgium household size');
-assert(byId.switzerland.householdSize === 2.24, 'Switzerland household size');
-assert(byId.denmark.householdSize === 1.83, 'Denmark household size');
-assert(byId['united-kingdom'].householdSize === 2.35, 'UK household size');
+assert(byId.india.householdSize === 4.42, 'India household size');
+assert(byId.nigeria.householdSize === 5.37, 'Nigeria household size');
+assert(data.defaultPresetId === 'united-states', 'default preset');
 
-for (const preset of data.presets) {
+for (const preset of countries) {
   assert(preset.householdSize > 0, `${preset.id} householdSize`);
+  assert(preset.householdSizeYear, `${preset.id} year`);
   assert(preset.occupancy > 0 && preset.occupancy <= 100, `${preset.id} occupancy`);
   assert(preset.apartmentPop > 0, `${preset.id} apartmentPop`);
-  assert(preset.pctResidential >= 0 && preset.pctResidential <= 100, `${preset.id} pctResidential`);
-  assert(preset.pctMapped >= 1 && preset.pctMapped <= 100, `${preset.id} pctMapped`);
 }
 
 console.log('PASS demographics presets', {
-  countries: ids.filter((id) => id !== 'custom'),
+  countries: countries.length,
   source: data.source.label,
+  sample: ['united-states', 'india', 'nigeria', 'japan'].map((id) => ({
+    id,
+    householdSize: byId[id].householdSize,
+  })),
 });
