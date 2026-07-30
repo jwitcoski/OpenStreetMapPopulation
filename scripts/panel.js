@@ -158,7 +158,8 @@ function applyPreset(preset) {
   document.getElementById('pct-residential').value = preset.pctResidential;
   document.getElementById('household-size').value = preset.householdSize;
   document.getElementById('occupancy').value = preset.occupancy;
-  document.getElementById('apartment-pop').value = preset.apartmentPop;
+  document.getElementById('sqm-per-household').value =
+    preset.sqmPerHousehold ?? 70;
   document.getElementById('pct-mapped').value = preset.pctMapped;
 
   const hint = document.getElementById('household-size-hint');
@@ -177,7 +178,7 @@ export function readParams() {
     pctResidential: numberValue('pct-residential'),
     householdSize: numberValue('household-size'),
     occupancy: numberValue('occupancy'),
-    apartmentPop: numberValue('apartment-pop'),
+    sqmPerHousehold: numberValue('sqm-per-household'),
     pctMapped: numberValue('pct-mapped'),
   };
 }

@@ -189,7 +189,7 @@ export function buildingsToHeatFeatures(buildings, params) {
     type: 'FeatureCollection',
     features: buildings
       .map((building) => {
-        const weight = peopleForBuilding(building.category, params);
+        const weight = peopleForBuilding(building, params);
         if (weight <= 0) return null;
         return {
           type: 'Feature',

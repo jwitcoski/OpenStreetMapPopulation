@@ -9,6 +9,8 @@
  *   other       — building=yes and uncommon tags (partially residential via %)
  */
 
+import area from '@turf/area';
+import { polygon } from '@turf/helpers';
 import {
   APARTMENT_TYPES,
   COMMERCIAL_TYPES,
@@ -30,10 +32,13 @@ import {
  * @property {string} buildingType
  * @property {number} longitude
  * @property {number} latitude
+ * @property {number | null} levels
+ * @property {number | null} flats
+ * @property {number | null} footprintAreaM2
  */
 
 /**
- * Classify Overpass elements and keep centers for the heatmap.
+ * Classify Overpass elements and keep centers / size cues for estimates.
  * @param {Array<object>} elements
  * @returns {{ counts: BuildingCounts, buildings: BuildingRecord[] }}
  */
@@ -77,8 +82,102 @@ export function classifyBuildings(elements) {
       buildingType,
       longitude: center.lon,
       latitude: center.lat,
+      levels: parseBuildingLevels(element.tags),
+      flats: parseBuildingFlats(element.tags),
+      footprintAreaM2: footprintAreaFromElement(element),
     });
   }
 
   return { counts, buildings };
+}
+
+/**
+ * Read building:levels (above-ground storeys). Returns null if untagged.
+ * @param {Record<string, string> | undefined} tags
+ * @returns {number | null}
+ */
+export function parseBuildingLevels(tags) {
+  const raw = tags?.['building:levels'];
+  if (raw == null || raw === '') return null;
+  // OSM sometimes uses "3;4" or "2.5" — take the first finite number.
+  const match = String(raw).match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return value;
+}
+
+/**
+ * Read building:flats (explicit dwelling count) when mapped.
+ * @param {Record<string, string> | undefined} tags
+ * @returns {number | null}
+ */
+export function parseBuildingFlats(tags) {
+  const raw = tags?.['building:flats'] ?? tags?.flats;
+  if (raw == null || raw === '') return null;
+  const match = String(raw).match(/(\d+(?:\.\d+)?)/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  if (!Number.isFinite(value) || value <= 0) return null;
+  return value;
+}
+
+/**
+ * Footprint area in m² from Overpass `out geom` coordinates.
+ * Ways are supported; relations without a usable outer ring return null.
+ * @param {object} element
+ * @returns {number | null}
+ */
+export function footprintAreaFromElement(element) {
+  const ring = ringFromElement(element);
+  if (!ring || ring.length < 4) return null;
+
+  try {
+    const sqm = area(polygon([ring]));
+    if (!Number.isFinite(sqm) || sqm <= 0) return null;
+    return sqm;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * @param {object} element
+ * @returns {number[][] | null} closed [lon, lat] ring
+ */
+function ringFromElement(element) {
+  if (Array.isArray(element.geometry) && element.geometry.length >= 3) {
+    return closeRing(
+      element.geometry.map((node) => [Number(node.lon), Number(node.lat)])
+    );
+  }
+
+  // Multipolygon relations: use the longest outer member ring when present.
+  if (element.type === 'relation' && Array.isArray(element.members)) {
+    let best = null;
+    for (const member of element.members) {
+      if (member?.role && member.role !== 'outer') continue;
+      if (!Array.isArray(member.geometry) || member.geometry.length < 3) continue;
+      const ring = closeRing(
+        member.geometry.map((node) => [Number(node.lon), Number(node.lat)])
+      );
+      if (!best || ring.length > best.length) best = ring;
+    }
+    return best;
+  }
+
+  return null;
+}
+
+function closeRing(ring) {
+  const cleaned = ring.filter(
+    ([lon, lat]) => Number.isFinite(lon) && Number.isFinite(lat)
+  );
+  if (cleaned.length < 3) return null;
+  const first = cleaned[0];
+  const last = cleaned[cleaned.length - 1];
+  if (first[0] !== last[0] || first[1] !== last[1]) {
+    cleaned.push([first[0], first[1]]);
+  }
+  return cleaned;
 }

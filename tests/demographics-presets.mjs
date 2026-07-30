@@ -54,7 +54,7 @@ for (const preset of countries) {
   assert(preset.householdSize > 0, `${preset.id} householdSize`);
   assert(preset.householdSizeYear, `${preset.id} year`);
   assert(preset.occupancy > 0 && preset.occupancy <= 100, `${preset.id} occupancy`);
-  assert(preset.apartmentPop > 0, `${preset.id} apartmentPop`);
+  assert(preset.sqmPerHousehold > 0, `${preset.id} sqmPerHousehold`);
 }
 
 console.log('PASS demographics presets', {

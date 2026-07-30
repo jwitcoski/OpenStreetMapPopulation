@@ -117,7 +117,7 @@ for official, row in sorted(latest.items(), key=lambda kv: SHORT_NAMES.get(kv[0]
     'dataSource': row['dataSource'],
     'pctResidential': 80,
     'occupancy': 90,
-    'apartmentPop': int(max(20, round(hh * 14))),
+    'sqmPerHousehold': 70,
     'pctMapped': 90,
   })
 
@@ -132,7 +132,7 @@ for p in presets:
 
 presets.append({
   'id':'custom','name':'Custom','householdSize':2.5,
-  'pctResidential':80,'occupancy':90,'apartmentPop':40,'pctMapped':100,
+  'pctResidential':80,'occupancy':90,'sqmPerHousehold':70,'pctMapped':100,
 })
 
 data={
@@ -140,7 +140,7 @@ data={
     'label': 'UN DESA Household Size and Composition 2022',
     'url': 'https://www.un.org/development/desa/pd/data/household-size-and-composition',
     'dataset': ${JSON.stringify(datasetUrl)},
-    'countriesNote': 'Average household size for each country/area is the latest available estimate from the UN DESA Database on Household Size and Composition 2022 Excel table. Occupancy, apartment-building size, residential share, and mapped completeness are estimation defaults for this tool (not from UN DESA).',
+    'countriesNote': 'Average household size for each country/area is the latest available estimate from the UN DESA Database on Household Size and Composition 2022 Excel table. Occupancy, floor area per household, residential share, and mapped completeness are estimation defaults for this tool (not from UN DESA).',
   },
   'defaultPresetId': 'united-states',
   'presets': presets,

@@ -29,6 +29,9 @@ const TRIES_PER_ENDPOINT = 2;
 /** How long cached polygon results stay valid. */
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
+/** Bump when the Overpass query shape / classified fields change. */
+const CACHE_VERSION = 'v2-geom';
+
 /** @type {Map<string, { savedAt: number, result: object }>} */
 const resultCache = new Map();
 
@@ -68,13 +71,14 @@ export function polygonToOverpassPoly(geometry) {
  * Build the Overpass QL query that selects buildings inside a polygon.
  */
 export function buildBuildingsQuery(polyString) {
+  // `geom` is needed for footprint-area apartment estimates.
   return `
 [out:json][timeout:25];
 (
   way["building"](poly:"${polyString}");
   relation["building"](poly:"${polyString}");
 );
-out tags center;
+out tags center geom;
 `.trim();
 }
 
@@ -100,7 +104,7 @@ export async function fetchBuildingsInPolygon(
   } = {}
 ) {
   const polyString = polygonToOverpassPoly(geometry);
-  const cacheKey = polyString;
+  const cacheKey = `${CACHE_VERSION}:${polyString}`;
   const cached = resultCache.get(cacheKey);
 
   if (cached && now() - cached.savedAt < CACHE_TTL_MS) {

@@ -283,7 +283,7 @@ async function main() {
         latestBuildings = buildings;
 
         const params = readParams();
-        const population = estimatePopulation(counts, params);
+        const population = estimatePopulation(buildings, params);
         latestPopulation = population;
         heatmap.setBuildings(buildings, params);
         renderStats({
@@ -391,7 +391,7 @@ async function main() {
   function recomputeFromParams(params) {
     if (!latestCounts) return;
 
-    const population = estimatePopulation(latestCounts, params);
+    const population = estimatePopulation(latestBuildings, params);
     latestPopulation = population;
     heatmap.updateWeights(params);
     renderStats({
