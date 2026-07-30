@@ -1,0 +1,47 @@
+/*
+ * layout.css
+ * Page shell: full-screen map and basic document reset.
+ */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background: #dfe8e4;
+}
+
+/* MapLibre draws into this full-viewport container */
+#map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Soft color wash over the basemap (does not block clicks) */
+#map::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  background: var(--map-veil);
+  z-index: 1;
+}
+
+/* Keep MapLibre zoom/draw controls clear of the panel */
+.maplibregl-ctrl-top-left {
+  top: 0.75rem;
+  left: 0.75rem;
+}
+
+.mapbox-gl-draw_ctrl-draw-btn {
+  border-radius: 4px;
+}

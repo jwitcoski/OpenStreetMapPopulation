@@ -4,17 +4,27 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Population Estimate Based on Buildings</title>
+
+    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap"
       rel="stylesheet"
     />
+
+    <!--
+      App styles are loaded from scripts/main.js so Vite can bundle them.
+      See styles/ for the human-readable CSS source files.
+    -->
   </head>
   <body>
-    <div id="map"></div>
+    <!-- Full-screen map canvas (MapLibre mounts here) -->
+    <div id="map" role="application" aria-label="City map for drawing an area"></div>
 
+    <!-- Side panel: results + estimate settings -->
     <aside id="panel" class="panel" aria-label="Population estimate controls">
+      <!-- Branding and instructions -->
       <header class="panel__header">
         <p class="panel__brand">BuildingPop</p>
         <h1 class="panel__title">Population estimate</h1>
@@ -23,11 +33,13 @@
         </p>
       </header>
 
-      <div class="panel__stats" id="stats">
+      <!-- Live counts filled in by scripts/panel.js -->
+      <section class="panel__stats" id="stats" aria-live="polite">
         <div class="stat">
           <span class="stat__label">Population</span>
           <span class="stat__value" id="stat-population">—</span>
         </div>
+
         <div class="stat-grid">
           <div class="stat stat--small">
             <span class="stat__label">Buildings</span>
@@ -54,10 +66,12 @@
             <span class="stat__value" id="stat-area">—</span>
           </div>
         </div>
-      </div>
+      </section>
 
+      <!-- Short status line (loading, errors, tips) -->
       <p class="panel__status" id="status" role="status"></p>
 
+      <!-- User-tunable estimate inputs -->
       <form class="panel__form" id="params-form">
         <label class="field">
           <span>Demographics preset</span>
@@ -131,7 +145,8 @@
       </form>
 
       <p class="panel__formula">
-        Estimate = (apartments × people/apt + (houses + other × residential%) × occupancy × household size) × mapped%
+        Estimate = (apartments × people/apt + (houses + other × residential%) × occupancy × household
+        size) × mapped%
       </p>
 
       <footer class="panel__footer">
@@ -143,6 +158,7 @@
       </footer>
     </aside>
 
-    <script type="module" src="/src/main.js"></script>
+    <!-- App entry point — see scripts/main.js -->
+    <script type="module" src="/scripts/main.js"></script>
   </body>
 </html>

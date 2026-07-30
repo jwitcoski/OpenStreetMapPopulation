@@ -1,38 +1,53 @@
+/*
+ * panel.js
+ * Reads and updates the side panel DOM (stats, status, form fields).
+ * No map or Overpass logic lives here.
+ */
+
+/**
+ * Load country / custom demographic presets from public/demographics.json.
+ */
 export async function loadPresets() {
   const response = await fetch(
     `${import.meta.env.BASE_URL}demographics.json`
   );
+
   if (!response.ok) {
     throw new Error('Could not load demographics presets');
   }
+
   return response.json();
 }
 
+/**
+ * Wire up the preset dropdown and form inputs.
+ * Calls onParamsChange whenever the user edits a value.
+ */
 export function initPanel(presets, { onParamsChange }) {
   const presetSelect = document.getElementById('preset');
   const form = document.getElementById('params-form');
 
   presetSelect.innerHTML = presets
-    .map((p) => `<option value="${p.id}">${p.name}</option>`)
+    .map((preset) => `<option value="${preset.id}">${preset.name}</option>`)
     .join('');
 
   applyPreset(presets[0]);
 
   presetSelect.addEventListener('change', () => {
-    const preset = presets.find((p) => p.id === presetSelect.value);
-    if (preset) {
-      applyPreset(preset);
-      onParamsChange(readParams());
-    }
+    const selected = presets.find((preset) => preset.id === presetSelect.value);
+    if (!selected) return;
+    applyPreset(selected);
+    onParamsChange(readParams());
   });
 
   form.addEventListener('input', () => {
     onParamsChange(readParams());
   });
 
-  return { readParams, setStatus, renderStats };
+  return { readParams };
 }
 
+/** Copy a preset's numbers into the form fields. */
 function applyPreset(preset) {
   document.getElementById('pct-residential').value = preset.pctResidential;
   document.getElementById('household-size').value = preset.householdSize;
@@ -41,6 +56,7 @@ function applyPreset(preset) {
   document.getElementById('pct-mapped').value = preset.pctMapped;
 }
 
+/** Read the current estimate parameters from the form. */
 export function readParams() {
   return {
     pctResidential: numberValue('pct-residential'),
@@ -51,17 +67,25 @@ export function readParams() {
   };
 }
 
-function numberValue(id) {
-  return Number(document.getElementById(id).value);
+function numberValue(elementId) {
+  return Number(document.getElementById(elementId).value);
 }
 
+/**
+ * Show a short status message under the stats.
+ * @param {string} message
+ * @param {'' | 'error' | 'loading'} [kind]
+ */
 export function setStatus(message, kind = '') {
-  const el = document.getElementById('status');
-  el.textContent = message ?? '';
-  el.classList.remove('is-error', 'is-loading');
-  if (kind) el.classList.add(`is-${kind}`);
+  const statusElement = document.getElementById('status');
+  statusElement.textContent = message ?? '';
+  statusElement.classList.remove('is-error', 'is-loading');
+  if (kind) statusElement.classList.add(`is-${kind}`);
 }
 
+/**
+ * Update all statistic readouts in the panel.
+ */
 export function renderStats({ population, counts, areaKm2 }) {
   setText('stat-population', formatNumber(population));
   setText('stat-buildings', formatNumber(counts?.total));
@@ -75,8 +99,8 @@ export function renderStats({ population, counts, areaKm2 }) {
   );
 }
 
-function setText(id, value) {
-  document.getElementById(id).textContent = value ?? '—';
+function setText(elementId, value) {
+  document.getElementById(elementId).textContent = value ?? '—';
 }
 
 function formatNumber(value) {

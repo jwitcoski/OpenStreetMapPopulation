@@ -1,7 +1,14 @@
+/*
+ * map.js
+ * Creates the MapLibre map and polygon draw tools.
+ * Also measures / validates drawn polygon area.
+ */
+
 import maplibregl from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import area from '@turf/area';
 import { polygon } from '@turf/helpers';
+
 import {
   DEFAULT_CENTER,
   DEFAULT_ZOOM,
@@ -13,11 +20,12 @@ import {
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-// MapboxDraw expects a mapboxgl global; MapLibre is API-compatible.
+// MapboxDraw still looks for a global named mapboxgl; MapLibre works as a drop-in.
 if (!globalThis.mapboxgl) {
   globalThis.mapboxgl = maplibregl;
 }
 
+/** Free raster basemap (OSM data via CARTO) — no API key required. */
 const BASEMAP_STYLE = {
   version: 8,
   glyphs: 'https://demotiles.maplibre.org/font/{fontstack}/{range}.pbf',
@@ -43,9 +51,14 @@ const BASEMAP_STYLE = {
   ],
 };
 
-export function createMap(container) {
+/**
+ * Create the map and attach zoom + draw controls.
+ * @param {string} containerId - DOM id of the map div
+ * @returns {{ map: maplibregl.Map, draw: MapboxDraw }}
+ */
+export function createMap(containerId) {
   const map = new maplibregl.Map({
-    container,
+    container: containerId,
     style: BASEMAP_STYLE,
     center: DEFAULT_CENTER,
     zoom: DEFAULT_ZOOM,
@@ -54,7 +67,10 @@ export function createMap(container) {
     attributionControl: true,
   });
 
-  map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
+  map.addControl(
+    new maplibregl.NavigationControl({ showCompass: false }),
+    'top-left'
+  );
 
   const draw = new MapboxDraw({
     displayControlsDefault: false,
@@ -70,26 +86,38 @@ export function createMap(container) {
   return { map, draw };
 }
 
+/**
+ * Return the first polygon currently on the draw layer, or null.
+ */
 export function getDrawnPolygon(draw) {
   const data = draw.getAll();
   const feature = data.features.find((f) => f.geometry?.type === 'Polygon');
   return feature ?? null;
 }
 
+/**
+ * Measure a GeoJSON polygon's area in square kilometers.
+ */
 export function measureAreaKm2(geometry) {
-  const km2 = area(polygon(geometry.coordinates)) / 1_000_000;
-  return km2;
+  return area(polygon(geometry.coordinates)) / 1_000_000;
 }
 
+/**
+ * Ensure the polygon is small enough for a city-scale Overpass query.
+ * Throws an error with code AREA_TOO_LARGE when over the limit.
+ * @returns {number} area in km²
+ */
 export function assertCityScaleArea(geometry) {
-  const km2 = measureAreaKm2(geometry);
-  if (km2 > MAX_AREA_KM2) {
+  const areaKm2 = measureAreaKm2(geometry);
+
+  if (areaKm2 > MAX_AREA_KM2) {
     const error = new Error(
-      `Polygon is ${km2.toFixed(1)} km² — keep it under ${MAX_AREA_KM2} km² (city blocks / neighborhood).`
+      `Polygon is ${areaKm2.toFixed(1)} km² — keep it under ${MAX_AREA_KM2} km² (city blocks / neighborhood).`
     );
     error.code = 'AREA_TOO_LARGE';
-    error.areaKm2 = km2;
+    error.areaKm2 = areaKm2;
     throw error;
   }
-  return km2;
+
+  return areaKm2;
 }

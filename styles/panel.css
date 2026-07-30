@@ -1,53 +1,7 @@
-:root {
-  --ink: #1a2421;
-  --muted: #5a6b64;
-  --panel: rgba(247, 244, 238, 0.94);
-  --panel-border: rgba(26, 36, 33, 0.12);
-  --accent: #0f6b5c;
-  --accent-soft: #d7ebe6;
-  --danger: #9b2c2c;
-  --map-veil: linear-gradient(
-    135deg,
-    rgba(15, 107, 92, 0.08),
-    rgba(247, 244, 238, 0.02) 40%,
-    transparent 70%
-  );
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "DM Sans", "Segoe UI", sans-serif;
-  --shadow: 0 18px 50px rgba(26, 36, 33, 0.18);
-  --radius: 18px;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  height: 100%;
-  font-family: var(--font-body);
-  color: var(--ink);
-  background: #dfe8e4;
-}
-
-#map {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-}
-
-#map::after {
-  content: "";
-  pointer-events: none;
-  position: absolute;
-  inset: 0;
-  background: var(--map-veil);
-  z-index: 1;
-}
+/*
+ * panel.css
+ * Side panel: branding, stats, form fields, and mobile layout.
+ */
 
 .panel {
   position: absolute;
@@ -77,6 +31,8 @@ body {
   }
 }
 
+/* ----- Header ----- */
+
 .panel__brand {
   margin: 0;
   font-family: var(--font-display);
@@ -99,6 +55,8 @@ body {
   font-size: 0.92rem;
   line-height: 1.4;
 }
+
+/* ----- Stats ----- */
 
 .panel__stats {
   margin-bottom: 0.75rem;
@@ -143,6 +101,8 @@ body {
   border: 1px solid var(--panel-border);
 }
 
+/* ----- Status line ----- */
+
 .panel__status {
   min-height: 1.25rem;
   margin: 0 0 0.85rem;
@@ -157,6 +117,8 @@ body {
 .panel__status.is-loading {
   color: var(--accent);
 }
+
+/* ----- Form fields ----- */
 
 .panel__form {
   display: grid;
@@ -204,14 +166,7 @@ body {
   color: var(--accent);
 }
 
-.maplibregl-ctrl-top-left {
-  top: 0.75rem;
-  left: 0.75rem;
-}
-
-.mapbox-gl-draw_ctrl-draw-btn {
-  border-radius: 4px;
-}
+/* ----- Mobile: panel becomes a bottom sheet ----- */
 
 @media (max-width: 720px) {
   .panel {

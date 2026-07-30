@@ -1,12 +1,43 @@
-import './style.css';
-import { createMap, getDrawnPolygon, assertCityScaleArea } from './map.js';
+/*
+ * main.js
+ * App entry point — wires map drawing to Overpass + population estimate.
+ *
+ * File map:
+ *   styles/*                  CSS (variables, layout, panel)
+ *   scripts/config.js         Zoom limits and building-type lists
+ *   scripts/map.js            MapLibre map + draw tools
+ *   scripts/overpass.js       Fetch buildings from Overpass
+ *   scripts/classify-buildings.js  Count houses / apartments / etc.
+ *   scripts/population.js     Estimate residents from counts
+ *   scripts/panel.js          Side-panel DOM updates
+ */
+
+import '../styles/variables.css';
+import '../styles/layout.css';
+import '../styles/panel.css';
+
+import { MIN_ZOOM } from './config.js';
+import {
+  assertCityScaleArea,
+  createMap,
+  getDrawnPolygon,
+} from './map.js';
 import { fetchBuildingsInPolygon } from './overpass.js';
 import { estimatePopulation } from './population.js';
-import { initPanel, loadPresets, renderStats, setStatus } from './ui.js';
-import { MIN_ZOOM } from './config.js';
+import {
+  initPanel,
+  loadPresets,
+  renderStats,
+  setStatus,
+} from './panel.js';
 
+/** Last successful building counts (used when form inputs change). */
 let latestCounts = null;
+
+/** Last measured polygon area in km². */
 let latestAreaKm2 = null;
+
+/** AbortController for the in-flight Overpass request. */
 let activeController = null;
 
 async function main() {
@@ -21,16 +52,27 @@ async function main() {
     setStatus(`Zoom in to city level (z${MIN_ZOOM}+), then draw a polygon.`);
   });
 
-  const runEstimate = async () => {
+  map.on('draw.create', runEstimate);
+  map.on('draw.update', runEstimate);
+  map.on('draw.delete', clearEstimate);
+
+  /**
+   * When the user draws or edits a polygon:
+   * 1. Check area is city-scale
+   * 2. Query Overpass for buildings
+   * 3. Classify + estimate population
+   * 4. Update the side panel
+   */
+  async function runEstimate() {
     const feature = getDrawnPolygon(draw);
+
     if (!feature) {
-      latestCounts = null;
-      latestAreaKm2 = null;
-      renderStats({ population: null, counts: null, areaKm2: null });
+      clearEstimate();
       setStatus('Draw a polygon over the area you want to estimate.');
       return;
     }
 
+    // Cancel any previous query still running.
     if (activeController) activeController.abort();
     activeController = new AbortController();
 
@@ -46,6 +88,7 @@ async function main() {
 
       const population = estimatePopulation(counts, readParams());
       renderStats({ population, counts, areaKm2 });
+
       setStatus(
         counts.total
           ? `Counted ${counts.total} buildings in ${areaKm2.toFixed(2)} km².`
@@ -70,20 +113,20 @@ async function main() {
       console.error(error);
       setStatus(error.message || 'Building query failed.', 'error');
     }
-  };
+  }
 
-  map.on('draw.create', runEstimate);
-  map.on('draw.update', runEstimate);
-  map.on('draw.delete', () => {
+  function clearEstimate() {
     if (activeController) activeController.abort();
     latestCounts = null;
     latestAreaKm2 = null;
     renderStats({ population: null, counts: null, areaKm2: null });
     setStatus('Polygon cleared. Draw another to estimate.');
-  });
+  }
 
+  /** Re-run the math when the user tweaks form numbers (no new Overpass call). */
   function recomputeFromParams(params) {
     if (!latestCounts) return;
+
     const population = estimatePopulation(latestCounts, params);
     renderStats({
       population,

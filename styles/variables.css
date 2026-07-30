@@ -1,0 +1,24 @@
+/*
+ * variables.css
+ * Shared design tokens used across the app.
+ */
+
+:root {
+  --ink: #1a2421;
+  --muted: #5a6b64;
+  --panel: rgba(247, 244, 238, 0.94);
+  --panel-border: rgba(26, 36, 33, 0.12);
+  --accent: #0f6b5c;
+  --accent-soft: #d7ebe6;
+  --danger: #9b2c2c;
+  --map-veil: linear-gradient(
+    135deg,
+    rgba(15, 107, 92, 0.08),
+    rgba(247, 244, 238, 0.02) 40%,
+    transparent 70%
+  );
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "DM Sans", "Segoe UI", sans-serif;
+  --shadow: 0 18px 50px rgba(26, 36, 33, 0.18);
+  --radius: 18px;
+}
