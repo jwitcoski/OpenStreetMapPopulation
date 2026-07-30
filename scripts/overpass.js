@@ -2,15 +2,31 @@
  * overpass.js
  * Talks to the Overpass API: turn a drawn polygon into OSM building results.
  *
- * Public Overpass instances often return 504 when busy. We try several
- * mirrors and retry transient failures before giving up.
+ * Public Overpass instances rate-limit aggressively (429) and sometimes
+ * return 504 when busy. We:
+ *   - cache recent polygon results (avoids repeat downloads)
+ *   - enforce a client-side gap between live requests
+ *   - on 429, wait (Retry-After) instead of blasting every mirror
+ *   - on 502/503/504, fail over to an independent mirror after a pause
  */
 
 import { OVERPASS_URLS } from './config.js';
 import { classifyBuildings } from './classify-buildings.js';
 
-/** HTTP statuses worth retrying on another mirror / later attempt. */
-const RETRYABLE_STATUS = new Set([429, 502, 503, 504]);
+/** HTTP statuses that mean "try another server later". */
+const FAILOVER_STATUS = new Set([502, 503, 504]);
+
+/** Minimum time between live Overpass calls from this browser tab. */
+const MIN_REQUEST_GAP_MS = 8000;
+
+/** How long cached polygon results stay valid. */
+const CACHE_TTL_MS = 15 * 60 * 1000;
+
+/** @type {Map<string, { savedAt: number, result: object }>} */
+const resultCache = new Map();
+
+/** Timestamp of the last live (non-cache) Overpass request start. */
+let lastLiveRequestAt = 0;
 
 /**
  * Convert a GeoJSON polygon into Overpass poly:"lat lon lat lon ..." syntax.
@@ -18,7 +34,6 @@ const RETRYABLE_STATUS = new Set([429, 502, 503, 504]);
  */
 export function polygonToOverpassPoly(geometry) {
   const ring = geometry.coordinates[0];
-  // Keep rings short — huge vertex lists slow Overpass poly filters.
   const simplified = simplifyRing(ring, 40);
   return simplified
     .map(([longitude, latitude]) => `${latitude} ${longitude}`)
@@ -48,13 +63,36 @@ out tags center;
  *   signal?: AbortSignal,
  *   onStatus?: (message: string) => void,
  *   endpoints?: string[],
+ *   now?: () => number,
  * }} [options]
  */
 export async function fetchBuildingsInPolygon(
   geometry,
-  { signal, onStatus, endpoints = OVERPASS_URLS } = {}
+  {
+    signal,
+    onStatus,
+    endpoints = OVERPASS_URLS,
+    now = () => Date.now(),
+  } = {}
 ) {
   const polyString = polygonToOverpassPoly(geometry);
+  const cacheKey = polyString;
+  const cached = resultCache.get(cacheKey);
+
+  if (cached && now() - cached.savedAt < CACHE_TTL_MS) {
+    onStatus?.('Using cached building data for this area…');
+    return cached.result;
+  }
+
+  // Space out live requests so we do not trip Overpass rate limits.
+  const gap = MIN_REQUEST_GAP_MS - (now() - lastLiveRequestAt);
+  if (gap > 0) {
+    onStatus?.(
+      `Waiting ${Math.ceil(gap / 1000)}s to respect Overpass rate limits…`
+    );
+    await wait(gap, signal);
+  }
+
   const query = buildBuildingsQuery(polyString);
   const body = `data=${encodeURIComponent(query)}`;
 
@@ -70,37 +108,58 @@ export async function fetchBuildingsInPolygon(
       onStatus?.('Querying OpenStreetMap buildings…');
     } else {
       onStatus?.(
-        `Overpass server busy — trying mirror ${attempt + 1}/${endpoints.length}…`
+        `Trying another Overpass server (${attempt + 1}/${endpoints.length})…`
       );
-      await wait(400 * attempt, signal);
+      await wait(1500 * attempt, signal);
     }
 
     try {
-      const data = await postOverpass(endpoint, body, signal);
+      lastLiveRequestAt = now();
+      const { data, response } = await postOverpass(endpoint, body, signal);
+
       if (data.remark) {
-        // Timeout / memory remarks are often transient — try next mirror.
         lastError = new Error(data.remark);
         continue;
       }
-      return classifyBuildings(data.elements ?? []);
+
+      const result = classifyBuildings(data.elements ?? []);
+      resultCache.set(cacheKey, { savedAt: now(), result });
+      trimCache();
+      return result;
     } catch (error) {
       if (error.name === 'AbortError') throw error;
       lastError = error;
-      if (!isRetryableError(error)) throw error;
+
+      if (error.status === 429) {
+        const retryAfterMs = retryAfterMilliseconds(error.retryAfter) ?? 12000;
+        onStatus?.(
+          `Overpass rate limit hit — waiting ${Math.ceil(retryAfterMs / 1000)}s…`
+        );
+        await wait(retryAfterMs, signal);
+        // One more attempt on the next mirror (or same if last) after waiting.
+        continue;
+      }
+
+      if (!isFailoverError(error)) throw error;
     }
   }
 
+  if (lastError?.status === 429) {
+    throw new Error(
+      'Overpass rate limit (429). Wait about a minute, then try again — repeated draws reuse cache when possible.'
+    );
+  }
+
   throw new Error(
-    lastError?.message?.includes('504') || lastError?.status === 504
-      ? 'Overpass servers are busy (504). Wait a few seconds and try again.'
+    lastError?.status === 504 || /504|timeout|busy/i.test(lastError?.message || '')
+      ? 'Overpass servers are busy. Wait a few seconds and try again.'
       : lastError?.message ||
-          'Overpass servers are busy. Wait a few seconds and try again.'
+          'Overpass request failed. Wait a few seconds and try again.'
   );
 }
 
 /**
  * POST one Overpass query and parse JSON.
- * @throws {{ status?: number, message: string, name?: string }}
  */
 export async function postOverpass(endpoint, body, signal) {
   let response;
@@ -110,8 +169,6 @@ export async function postOverpass(endpoint, body, signal) {
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8',
         Accept: 'application/json',
-        // Overpass asks for an identifying UA; browsers already send one and
-        // may ignore this header, which is fine.
         'User-Agent':
           'BuildingPop/2.0 (https://github.com/jwitcoski/OpenStreetMapPopulation)',
       },
@@ -120,7 +177,7 @@ export async function postOverpass(endpoint, body, signal) {
     });
   } catch (error) {
     if (error.name === 'AbortError') throw error;
-    const wrapped = new Error(`Network error contacting Overpass (${endpoint})`);
+    const wrapped = new Error(`Network error contacting Overpass`);
     wrapped.cause = error;
     wrapped.retryable = true;
     throw wrapped;
@@ -129,19 +186,40 @@ export async function postOverpass(endpoint, body, signal) {
   if (!response.ok) {
     const error = new Error(`Overpass request failed (${response.status})`);
     error.status = response.status;
-    error.retryable = RETRYABLE_STATUS.has(response.status);
+    error.retryAfter = response.headers.get('Retry-After');
+    error.retryable = FAILOVER_STATUS.has(response.status) || response.status === 429;
     throw error;
   }
 
-  return response.json();
+  const data = await response.json();
+  return { data, response };
 }
 
-function isRetryableError(error) {
+/** Clear cached results (used by tests). */
+export function clearOverpassCache() {
+  resultCache.clear();
+  lastLiveRequestAt = 0;
+}
+
+function isFailoverError(error) {
   return Boolean(
     error.retryable ||
-      RETRYABLE_STATUS.has(error.status) ||
-      /504|503|502|429|timeout|busy|Network error/i.test(error.message || '')
+      FAILOVER_STATUS.has(error.status) ||
+      /504|503|502|timeout|busy|Network error/i.test(error.message || '')
   );
+}
+
+function retryAfterMilliseconds(retryAfter) {
+  if (!retryAfter) return null;
+  const asSeconds = Number(retryAfter);
+  if (!Number.isNaN(asSeconds) && asSeconds >= 0) {
+    return Math.min(60000, Math.max(1000, asSeconds * 1000));
+  }
+  const asDate = Date.parse(retryAfter);
+  if (!Number.isNaN(asDate)) {
+    return Math.min(60000, Math.max(1000, asDate - Date.now()));
+  }
+  return null;
 }
 
 function wait(ms, signal) {
@@ -157,6 +235,12 @@ function wait(ms, signal) {
     };
     signal?.addEventListener('abort', onAbort, { once: true });
   });
+}
+
+function trimCache() {
+  if (resultCache.size <= 20) return;
+  const oldestKey = resultCache.keys().next().value;
+  resultCache.delete(oldestKey);
 }
 
 /**

@@ -34,12 +34,10 @@ export const SEARCH_ZOOM = 15;
  */
 export const MAX_AREA_KM2 = 12;
 
-/** Public Overpass mirrors (tried in order on 504 / timeout). */
+/** Public Overpass mirrors (independent operators — tried slowly on failure). */
 export const OVERPASS_URLS = [
   'https://overpass-api.de/api/interpreter',
-  'https://lz4.overpass-api.de/api/interpreter',
   'https://overpass.osm.ch/api/interpreter',
-  'https://maps.mail.ru/osm/tools/overpass/api/interpreter',
 ];
 
 /** @deprecated use OVERPASS_URLS — kept for older imports */
