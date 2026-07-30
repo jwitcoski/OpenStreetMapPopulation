@@ -103,12 +103,6 @@
   animation: panel-in 320ms ease-out;
 }
 
-/* Dim / block draw controls when zoomed out too far for Overpass */
-.mapbox-gl-draw.is-disabled {
-  opacity: 0.4;
-  pointer-events: none;
-}
-
 @media (max-width: 720px) {
   .place-search {
     left: 0.75rem;

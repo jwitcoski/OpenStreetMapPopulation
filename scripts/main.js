@@ -17,6 +17,7 @@ import '../styles/variables.css';
 import '../styles/layout.css';
 import '../styles/panel.css';
 import '../styles/search.css';
+import '../styles/draw-cursors.css';
 
 import { TOOL_MIN_ZOOM } from './config.js';
 import {

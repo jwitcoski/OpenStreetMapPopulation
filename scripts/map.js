@@ -17,6 +17,7 @@ import {
   MIN_ZOOM,
   TOOL_MIN_ZOOM,
 } from './config.js';
+import { DRAW_STYLES } from './draw-styles.js';
 
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
@@ -25,6 +26,17 @@ import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 if (!globalThis.mapboxgl) {
   globalThis.mapboxgl = maplibregl;
 }
+
+/*
+ * Required for MapLibre: MapboxDraw defaults to mapboxgl-* class names.
+ * Without this remap, draw / delete never bind to the MapLibre canvas.
+ * https://maplibre.org/maplibre-gl-js/docs/examples/draw-polygon-with-mapbox-gl-draw/
+ */
+MapboxDraw.constants.classes.CANVAS = 'maplibregl-canvas';
+MapboxDraw.constants.classes.CONTROL_BASE = 'maplibregl-ctrl';
+MapboxDraw.constants.classes.CONTROL_PREFIX = 'maplibregl-ctrl-';
+MapboxDraw.constants.classes.CONTROL_GROUP = 'maplibregl-ctrl-group';
+MapboxDraw.constants.classes.ATTRIBUTION = 'maplibregl-ctrl-attrib';
 
 /** Free raster basemap (OSM data via CARTO) — no API key required. */
 const BASEMAP_STYLE = {
@@ -79,15 +91,19 @@ export function createMap(containerId) {
       polygon: true,
       trash: true,
     },
-    // Start in select mode so the trash button can delete a drawn polygon.
     defaultMode: 'simple_select',
+    styles: DRAW_STYLES,
   });
 
   map.addControl(draw, 'top-left');
 
-  // MapboxDraw's trash only deletes *selected* features. After drawing,
-  // select the new polygon so trash works. Also make trash clear all
-  // polygons if nothing is selected (common mobile frustration).
+  // After Draw mounts, mark its control group so we can enable/disable it.
+  const drawGroup = findDrawControlGroup();
+  if (drawGroup) {
+    drawGroup.classList.add('buildingpop-draw');
+  }
+
+  // Select a newly drawn polygon so trash / edit work immediately.
   map.on('draw.create', (event) => {
     const created = event.features?.[0];
     if (!created?.id) return;
@@ -97,6 +113,11 @@ export function createMap(containerId) {
   wireReliableTrashButton(draw);
 
   return { map, draw };
+}
+
+function findDrawControlGroup() {
+  const polygonButton = document.querySelector('.mapbox-gl-draw_polygon');
+  return polygonButton?.closest('.maplibregl-ctrl-group') ?? null;
 }
 
 /**
@@ -113,14 +134,12 @@ function wireReliableTrashButton(draw) {
   trashButton.addEventListener(
     'click',
     (event) => {
-      // If a feature is selected, let MapboxDraw's normal trash behavior run.
-      if (draw.getSelectedIds().length > 0) return;
-
       event.preventDefault();
       event.stopImmediatePropagation();
 
       if (draw.getAll().features.length === 0) return;
       draw.deleteAll();
+      draw.changeMode('simple_select');
     },
     true
   );
@@ -131,7 +150,10 @@ function wireReliableTrashButton(draw) {
  * When disabled, users can still pan / zoom / search the map.
  */
 export function setDrawToolEnabled(draw, enabled) {
-  const drawRoot = document.querySelector('.mapbox-gl-draw');
+  const drawRoot =
+    document.querySelector('.buildingpop-draw') ??
+    document.querySelector('.mapbox-gl-draw_polygon')?.closest('.maplibregl-ctrl-group');
+
   if (drawRoot) {
     drawRoot.classList.toggle('is-disabled', !enabled);
   }
@@ -139,7 +161,6 @@ export function setDrawToolEnabled(draw, enabled) {
   document.body.classList.toggle('is-tool-disabled', !enabled);
 
   if (!enabled) {
-    // Leave any finished polygon in place, but cancel in-progress drawing.
     try {
       draw.changeMode('simple_select');
     } catch {

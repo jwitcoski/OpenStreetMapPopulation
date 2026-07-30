@@ -36,10 +36,16 @@ body {
   z-index: 1;
 }
 
+/* Map controls must sit above the decorative veil */
+.maplibregl-control-container {
+  z-index: 2;
+}
+
 /* Keep MapLibre zoom/draw controls clear of the panel */
 .maplibregl-ctrl-top-left {
   top: 0.75rem;
   left: 0.75rem;
+  z-index: 2;
 }
 
 .mapbox-gl-draw_ctrl-draw-btn {
