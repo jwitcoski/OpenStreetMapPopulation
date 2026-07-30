@@ -1,5 +1,3 @@
-# BuildingPop (published site)
+# BuildingPop
 
 Live: https://jwitcoski.github.io/OpenStreetMapPopulation/
-
-Source: `cursor/modernize-overpass-gh-pages-87ef`
