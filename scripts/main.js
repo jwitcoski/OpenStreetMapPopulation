@@ -3,29 +3,30 @@
  * App entry point — wires map drawing to Overpass + population estimate.
  *
  * File map:
- *   styles/*                  CSS (variables, layout, panel, search)
+ *   styles/*                  CSS
  *   scripts/config.js         Zoom limits and building-type lists
- *   scripts/map.js            MapLibre map + draw tools
+ *   scripts/map.js            MapLibre map helpers
+ *   scripts/draw-polygon.js   Simple polygon drawing (no MapboxDraw)
  *   scripts/search.js         City / area search
  *   scripts/overpass.js       Fetch buildings from Overpass
- *   scripts/classify-buildings.js  Count houses / apartments / etc.
- *   scripts/population.js     Estimate residents from counts
- *   scripts/panel.js          Side-panel DOM updates
+ *   scripts/classify-buildings.js
+ *   scripts/population.js
+ *   scripts/panel.js
  */
 
 import '../styles/variables.css';
 import '../styles/layout.css';
 import '../styles/panel.css';
 import '../styles/search.css';
-import '../styles/draw-cursors.css';
+import '../styles/draw-controls.css';
 
 import { TOOL_MIN_ZOOM } from './config.js';
 import {
   assertCityScaleArea,
+  attachPolygonDrawer,
   createMap,
-  getDrawnPolygon,
   isToolZoomOk,
-  setDrawToolEnabled,
+  setToolEnabled,
 } from './map.js';
 import { fetchBuildingsInPolygon } from './overpass.js';
 import { estimatePopulation } from './population.js';
@@ -46,6 +47,9 @@ let latestAreaKm2 = null;
 /** AbortController for the in-flight Overpass request. */
 let activeController = null;
 
+/** Prevent overlapping estimate runs. */
+let estimateInFlight = false;
+
 const TOOL_DISABLED_NOTE =
   `Zoom in to city level (z${TOOL_MIN_ZOOM}+) to draw. Overpass can only handle city-sized areas — not regions or countries.`;
 
@@ -55,74 +59,95 @@ async function main() {
     onParamsChange: recomputeFromParams,
   });
 
-  const { map, draw } = createMap('map');
+  const { map } = createMap('map');
   initPlaceSearch(map);
 
   const toolBanner = document.getElementById('tool-banner');
+  const drawButton = document.getElementById('draw-polygon');
+  const finishButton = document.getElementById('finish-polygon');
   const clearButton = document.getElementById('clear-polygon');
 
-  clearButton?.addEventListener('click', () => {
-    if (draw.getAll().features.length === 0) {
+  const drawer = attachPolygonDrawer(map, {
+    onComplete: (feature) => {
+      finishButton.disabled = true;
+      runEstimate(feature);
+    },
+    onClear: () => {
+      finishButton.disabled = true;
       clearEstimate();
+    },
+    onCancel: () => {
+      finishButton.disabled = true;
+      setStatus('Drawing cancelled. Tap Draw area to start again.');
+    },
+    onVertexCount: (count) => {
+      finishButton.disabled = count < 3 || !isToolZoomOk(map);
+      if (count === 0) {
+        setStatus('Tap the map to place the first corner.');
+      } else if (count < 3) {
+        setStatus(`Corner ${count} placed — need at least 3.`);
+      } else {
+        setStatus('Tap the first (orange) corner or Finish to close the area.');
+      }
+    },
+  });
+
+  // Test / debug hook used by Playwright smoke tests.
+  window.__buildingPop = { map, drawer, ready: false };
+  map.on('load', () => {
+    window.__buildingPop.ready = true;
+    syncToolGate();
+  });
+
+  drawButton?.addEventListener('click', () => {
+    if (!isToolZoomOk(map)) {
+      syncToolGate();
       return;
     }
-    draw.deleteAll();
+    drawer.startDrawing();
+    setStatus('Tap the map to place corners. Tap the first corner to finish.');
+  });
+
+  finishButton?.addEventListener('click', () => {
+    drawer.finish();
+  });
+
+  clearButton?.addEventListener('click', () => {
+    drawer.clear();
   });
 
   function syncToolGate() {
     const enabled = isToolZoomOk(map);
-    setDrawToolEnabled(draw, enabled);
+    setToolEnabled(enabled);
 
-    if (toolBanner) {
-      toolBanner.hidden = enabled;
-    }
+    if (toolBanner) toolBanner.hidden = enabled;
 
     if (!enabled) {
+      if (drawer.isDrawing()) drawer.cancelDrawing();
       setStatus(TOOL_DISABLED_NOTE);
-    } else if (!getDrawnPolygon(draw) && !latestCounts) {
-      setStatus('Draw a polygon over the area you want to estimate.');
+    } else if (!drawer.getPolygon() && !latestCounts && !drawer.isDrawing()) {
+      setStatus('Search for a city, then tap Draw area.');
     }
   }
 
-  map.on('load', () => {
-    syncToolGate();
-  });
-
-  // zoomend only — per-frame zoom events were needlessly toggling draw mode.
   map.on('zoomend', syncToolGate);
 
-  map.on('draw.create', runEstimate);
-  map.on('draw.update', runEstimate);
-  map.on('draw.delete', clearEstimate);
-
-  let estimateInFlight = false;
-
-  /**
-   * When the user draws or edits a polygon:
-   * 1. Check zoom + area are city-scale
-   * 2. Query Overpass for buildings
-   * 3. Classify + estimate population
-   * 4. Update the side panel
-   */
-  async function runEstimate() {
+  async function runEstimate(feature) {
     if (estimateInFlight) return;
     estimateInFlight = true;
 
     try {
       if (!isToolZoomOk(map)) {
-        draw.deleteAll();
+        drawer.clear();
         syncToolGate();
         return;
       }
 
-      const feature = getDrawnPolygon(draw);
-
-      if (!feature) {
+      if (!feature?.geometry) {
         clearEstimate();
         return;
       }
 
-      // Cancel any previous query still running.
       if (activeController) activeController.abort();
       activeController = new AbortController();
 
@@ -155,7 +180,7 @@ async function main() {
         });
 
         if (error.code === 'AREA_TOO_LARGE') {
-          draw.deleteAll();
+          drawer.clear();
           setStatus(error.message, 'error');
           return;
         }
@@ -178,11 +203,10 @@ async function main() {
     if (!isToolZoomOk(map)) {
       setStatus(TOOL_DISABLED_NOTE);
     } else {
-      setStatus('Polygon cleared. Draw another to estimate.');
+      setStatus('Area cleared. Tap Draw area to estimate again.');
     }
   }
 
-  /** Re-run the math when the user tweaks form numbers (no new Overpass call). */
   function recomputeFromParams(params) {
     if (!latestCounts) return;
 

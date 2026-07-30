@@ -1,0 +1,43 @@
+/*
+ * draw-controls.css
+ * Draw / Finish / Clear buttons and disabled-tool state.
+ */
+
+.panel__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.45rem;
+  margin: 0 0 0.85rem;
+}
+
+.panel__action {
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  padding: 0.55rem 0.4rem;
+  background: var(--accent);
+  color: #f7f4ee;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.panel__action--muted {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--ink);
+  font-weight: 500;
+}
+
+.panel__action:hover,
+.panel__action:focus {
+  outline: 2px solid rgba(15, 107, 92, 0.3);
+}
+
+.panel__action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+body.is-tool-disabled [data-requires-tool] {
+  opacity: 0.45;
+}

@@ -50,8 +50,8 @@
         <p class="panel__brand">BuildingPop</p>
         <h1 class="panel__title">Population estimate</h1>
         <p class="panel__lede">
-          Search for a city, zoom in, then draw a polygon to count OSM buildings and
-          estimate residents.
+          Search for a city, zoom in, then tap Draw area and place corners on the map
+          to count OSM buildings and estimate residents.
         </p>
       </header>
 
@@ -93,9 +93,17 @@
       <!-- Short status line (loading, errors, tips) -->
       <p class="panel__status" id="status" role="status"></p>
 
-      <button type="button" id="clear-polygon" class="panel__clear">
-        Clear drawn area
-      </button>
+      <div class="panel__actions">
+        <button type="button" id="draw-polygon" class="panel__action" data-requires-tool>
+          Draw area
+        </button>
+        <button type="button" id="finish-polygon" class="panel__action" data-requires-tool disabled>
+          Finish
+        </button>
+        <button type="button" id="clear-polygon" class="panel__action panel__action--muted">
+          Clear
+        </button>
+      </div>
 
       <!-- User-tunable estimate inputs -->
       <form class="panel__form" id="params-form">
