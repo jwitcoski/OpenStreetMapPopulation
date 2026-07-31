@@ -30,7 +30,7 @@ const TRIES_PER_ENDPOINT = 2;
 const CACHE_TTL_MS = 15 * 60 * 1000;
 
 /** Bump when the Overpass query shape / classified fields change. */
-const CACHE_VERSION = 'v2-geom';
+const CACHE_VERSION = 'v3-geom-center';
 
 /** @type {Map<string, { savedAt: number, result: object }>} */
 const resultCache = new Map();
