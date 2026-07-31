@@ -65,13 +65,62 @@ const elements = [
     center: { lon: -77.034, lat: 38.894 },
     geometry: squareGeom,
   },
+  // Real Overpass `out geom` shape: geometry + bounds, no center.
+  {
+    type: 'way',
+    id: 999001,
+    tags: { building: 'house' },
+    bounds: {
+      minlat: 38.895,
+      minlon: -77.035,
+      maxlat: 38.8951,
+      maxlon: -77.0349,
+    },
+    geometry: [
+      { lon: -77.035, lat: 38.895 },
+      { lon: -77.0349, lat: 38.895 },
+      { lon: -77.0349, lat: 38.8951 },
+      { lon: -77.035, lat: 38.8951 },
+      { lon: -77.035, lat: 38.895 },
+    ],
+  },
+  // Geometry only (no center / bounds) — still need a heatmap point.
+  {
+    type: 'way',
+    id: 999002,
+    tags: { building: 'house' },
+    geometry: [
+      { lon: -77.036, lat: 38.896 },
+      { lon: -77.0359, lat: 38.896 },
+      { lon: -77.0359, lat: 38.8961 },
+      { lon: -77.036, lat: 38.8961 },
+      { lon: -77.036, lat: 38.896 },
+    ],
+  },
 ];
 
 const { counts, buildings } = classifyBuildings(elements);
 
-assert(counts.total === 6, `expected 6 buildings, got ${counts.total}`);
+assert(counts.total === 8, `expected 8 buildings, got ${counts.total}`);
 assert(counts.apartments === 3, `expected 3 apartments, got ${counts.apartments}`);
-assert(buildings.length === 6, `expected 6 records, got ${buildings.length}`);
+assert(counts.houses === 3, `expected 3 houses, got ${counts.houses}`);
+assert(buildings.length === 8, `expected 8 records, got ${buildings.length}`);
+
+const geomOnlyHouse = buildings.find(
+  (b) => b.buildingType === 'house' && b.longitude === -77.03495
+);
+assert(geomOnlyHouse, 'bounds-derived center house missing');
+assert(
+  Math.abs(geomOnlyHouse.latitude - 38.89505) < 1e-9,
+  `bounds center lat ${geomOnlyHouse.latitude}`
+);
+
+const ringOnlyHouse = buildings.find(
+  (b) =>
+    b.buildingType === 'house' &&
+    Math.abs(b.longitude - -77.03595) < 1e-9
+);
+assert(ringOnlyHouse, 'geometry-derived center house missing');
 
 const aptWithLevels = buildings.find(
   (b) => b.buildingType === 'apartments' && b.levels === 4 && b.flats == null
@@ -115,11 +164,12 @@ assert(
 
 const heat = buildingsToHeatFeatures(buildings, params);
 assert(
-  heat.features.length === 5,
+  heat.features.length === 7,
   `heat features exclude commercial, got ${heat.features.length}`
 );
 
 const population = estimatePopulation(buildings, params);
+assert(population > 0, `population should be > 0, got ${population}`);
 const weightSum = heat.features.reduce((sum, f) => sum + f.properties.weight, 0);
 assert(
   Math.round(weightSum) === population,

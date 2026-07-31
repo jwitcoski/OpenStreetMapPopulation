@@ -74,7 +74,9 @@ export function classifyBuildings(elements) {
 
     counts.total += 1;
 
-    const center = element.center;
+    // Overpass `out geom` returns geometry/bounds but omits `center`.
+    // Derive a point so population + heatmap still work.
+    const center = resolveBuildingCenter(element);
     if (center?.lon == null || center?.lat == null) continue;
 
     buildings.push({
@@ -89,6 +91,55 @@ export function classifyBuildings(elements) {
   }
 
   return { counts, buildings };
+}
+
+/**
+ * Prefer Overpass `center`, else bounds midpoint, else geometry centroid.
+ * @param {object} element
+ * @returns {{ lon: number, lat: number } | null}
+ */
+export function resolveBuildingCenter(element) {
+  const provided = element?.center;
+  if (provided?.lon != null && provided?.lat != null) {
+    const lon = Number(provided.lon);
+    const lat = Number(provided.lat);
+    if (Number.isFinite(lon) && Number.isFinite(lat)) {
+      return { lon, lat };
+    }
+  }
+
+  const bounds = element?.bounds;
+  if (
+    bounds &&
+    bounds.minlon != null &&
+    bounds.minlat != null &&
+    bounds.maxlon != null &&
+    bounds.maxlat != null
+  ) {
+    const lon = (Number(bounds.minlon) + Number(bounds.maxlon)) / 2;
+    const lat = (Number(bounds.minlat) + Number(bounds.maxlat)) / 2;
+    if (Number.isFinite(lon) && Number.isFinite(lat)) {
+      return { lon, lat };
+    }
+  }
+
+  const ring = ringFromElement(element);
+  if (!ring || ring.length < 3) return null;
+
+  // Average ring vertices (skip duplicate closing point when present).
+  const last = ring[ring.length - 1];
+  const first = ring[0];
+  const open =
+    first[0] === last[0] && first[1] === last[1] ? ring.slice(0, -1) : ring;
+  if (!open.length) return null;
+
+  let sumLon = 0;
+  let sumLat = 0;
+  for (const [lon, lat] of open) {
+    sumLon += lon;
+    sumLat += lat;
+  }
+  return { lon: sumLon / open.length, lat: sumLat / open.length };
 }
 
 /**
